@@ -12,13 +12,13 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- */
+*/
 
 package it.fahner.myjson;
 
 /**
- * A class that contains all possible configuration for the MyJsonApi.
- * @since 1.0
+ * A configuration object for MyJsonApi. Contains at least the URL that points to the Api.
+ * @since MyJsonApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
 public class MyJsonConfigs {
@@ -28,6 +28,7 @@ public class MyJsonConfigs {
 	
 	/**
 	 * Creates a new Api configurations object.
+	 * @since MyJsonApi 1.0
 	 * @param location The URL that points to the Api
 	 */
 	public MyJsonConfigs(String location) {
@@ -36,7 +37,7 @@ public class MyJsonConfigs {
 	
 	/**
 	 * Returns the URL that points to the Api.
-	 * @since 1.0
+	 * @since MyJsonApi 1.0
 	 * @return The Api URL
 	 */
 	public String getLocation() {
