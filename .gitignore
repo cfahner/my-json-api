@@ -1,0 +1,8 @@
+# Generic
+* ~
+
+# Java/eclipse
+.settings/*
+.project
+bin/*
+.classpath
