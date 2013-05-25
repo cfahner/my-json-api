@@ -14,30 +14,30 @@
    limitations under the License.
 */
 
-package it.fahner.myjson;
+package it.fahner.mywapi;
 
 /**
- * A configuration object for MyJsonApi. Contains at least the URL that points to the Api.
- * @since MyJsonApi 1.0
+ * A configuration object for MyWebApi. Contains at least the URL that points to the Api.
+ * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
-public class MyJsonConfigs {
+public class MyWebConfigs {
 	
 	/** Stores the URL that points to the Api. */
 	private String location;
 	
 	/**
 	 * Creates a new Api configurations object.
-	 * @since MyJsonApi 1.0
+	 * @since MyWebApi 1.0
 	 * @param location The URL that points to the Api
 	 */
-	public MyJsonConfigs(String location) {
+	public MyWebConfigs(String location) {
 		this.location = location;
 	}
 	
 	/**
 	 * Returns the URL that points to the Api.
-	 * @since MyJsonApi 1.0
+	 * @since MyWebApi 1.0
 	 * @return The Api URL
 	 */
 	public String getLocation() {

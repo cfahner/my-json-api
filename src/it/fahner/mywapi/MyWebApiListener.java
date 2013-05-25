@@ -14,16 +14,16 @@
    limitations under the License.
 */
 
-package it.fahner.myjson;
+package it.fahner.mywapi;
 
 /**
  * Event listener. Implementations of this interface can handle events fired by
- * MyJsonApi.
- * <p>Note: Remember to start listening to MyJsonApi by calling it's startListening method.</p>
- * @since MyJsonApi 1.0
+ * MyWebApi.
+ * <p>Note: Remember to start listening to MyWebApi by calling it's startListening method.</p>
+ * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
-public interface MyJsonApiListener {
+public interface MyWebApiListener {
 	
 	/**
 	 * Implement this method to run code when a MyRequest has been resolved.
@@ -33,7 +33,7 @@ public interface MyJsonApiListener {
 	 * kind of MyRequest has been resolved.
 	 * </p>
 	 * @see MyRequest MyRequest documentation
-	 * @since MyJsonApi 1.0
+	 * @since MyWebApi 1.0
 	 * @param request The MyRequest that has been resolved
 	 */
 	public void onRequestResolved(MyRequest request);

@@ -14,81 +14,81 @@
    limitations under the License.
 */
 
-package it.fahner.myjson;
+package it.fahner.mywapi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * The main entry point for the MyJsonApi library. All requests, threads, caches and listeners
+ * The main entry point for the MyWebApi library. All requests, threads, caches and listeners
  * are managed here.
- * <p>You must ALWAYS configure MyJsonApi before using it. For example:</p>
+ * <p>You must ALWAYS configure MyWebApi before using it. For example:</p>
  * <p><code>
- * MyJsonApi.setConfigs(new MyJsonConfigs("http://hostname.com/api/location/"));
+ * MyWebApi.initialize(new MyWebConfigs("http://hostname.com/api/location/"));
  * </code></p>
- * @since MyJsonApi 1.0
+ * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
-public final class MyJsonApi {
+public final class MyWebApi {
 	
 	/**
 	 * Represents the current version of this library.
-	 * @since MyJsonApi 1.0
+	 * @since MyWebApi 1.0
 	 */
 	public static final String VERSION = "1.0";
 	
 	/** Contains the initialization information. */
-	private static MyJsonConfigs configs;
+	private static MyWebConfigs configs;
 	
 	/** Stores all things that listen to this Api. */
-	private static HashMap<String, ArrayList<MyJsonApiListener>> listeners;
+	private static HashMap<String, ArrayList<MyWebApiListener>> listeners;
 	
 	/**
-	 * Initializes the MyJsonApi. It is possible to pass new configurations later.
-	 * @since MyJsonApi 1.0
+	 * Initializes the MyWebApi. It is possible to pass new configurations later.
+	 * @since MyWebApi 1.0
 	 * @param configs Configurations to use from now on
 	 */
-	public static void initialize(MyJsonConfigs configs) {
-		MyJsonApi.configs = configs;
+	public static void initialize(MyWebConfigs configs) {
+		MyWebApi.configs = configs;
 	}
 	
 	/**
-	 * Registers a listener to MyJsonApi. The listener will (from now on) receive updates
-	 * from MyJsonApi when MyRequests sent by that listener are resolved.
-	 * @since MyJsonApi 1.0
+	 * Registers a listener to MyWebApi. The listener will (from now on) receive updates
+	 * from MyWebApi when MyRequests sent by that listener are resolved.
+	 * @since MyWebApi 1.0
 	 * @param listener The listener to register
 	 */
-	public static void startListening(MyJsonApiListener listener) {
+	public static void startListening(MyWebApiListener listener) {
 		forceInit();
 		String cls = listener.getClass().getName();
-		ArrayList<MyJsonApiListener> activeListeners = listeners.get(cls);
-		if (activeListeners == null) { activeListeners = new ArrayList<MyJsonApiListener>(); }
+		ArrayList<MyWebApiListener> activeListeners = listeners.get(cls);
+		if (activeListeners == null) { activeListeners = new ArrayList<MyWebApiListener>(); }
 		activeListeners.add(listener);
 		listeners.put(cls, activeListeners);
 	}
 	
 	/**
 	 * Stops a listener from receiving any updates about the MyRequests it sends.
-	 * @since MyJsonApi 1.0
+	 * @since MyWebApi 1.0
 	 * @param listener The listener that should no longer receive updates
 	 */
-	public static void stopListening(MyJsonApiListener listener) {
+	public static void stopListening(MyWebApiListener listener) {
 		forceInit();
 		String cls = listener.getClass().getName();
-		ArrayList<MyJsonApiListener> activeListeners = listeners.get(cls);
+		ArrayList<MyWebApiListener> activeListeners = listeners.get(cls);
 		if (activeListeners == null) { return; } // no listeners anyway
 		activeListeners.remove(listener);
 		if (activeListeners.size() > 0) { listeners.put(cls, activeListeners); }
 		else { listeners.remove(cls); }
 	}
 	
-	private static MyJsonConfigs getConfigs() {
+	private static MyWebConfigs getConfigs() {
 		forceInit();
 		return configs;
 	}
 	
 	private static void forceInit() {
-		if (configs == null) { throw new RuntimeException("MyJsonApi not initialized!"); }
+		if (configs == null) { throw new RuntimeException("MyWebApi not initialized!"); }
 	}
 	
 	private static String getLocation() {
