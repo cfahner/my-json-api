@@ -92,4 +92,15 @@ public class HttpResponse {
 		return System.currentTimeMillis() - createTime;
 	}
 	
+	/**
+	 * Returns the amount of milliseconds left until this HTTP response expires, based on caching
+	 * information returned by the server.
+	 * @since MyWebApi 1.0
+	 * @return The amount of milliseconds left before it expires based on server information
+	 */
+	public long expireTimeLeft() {
+		long timeLeft = expires - System.currentTimeMillis();
+		return timeLeft > 0 ? timeLeft : 0;
+	}
+	
 }
