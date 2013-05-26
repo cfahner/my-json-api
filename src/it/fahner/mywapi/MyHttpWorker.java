@@ -43,13 +43,13 @@ import java.util.Locale;
 public class MyHttpWorker extends Thread {
 	
 	/**
-	 * The default encoding used when sending and receiving HTTP documents.
+	 * The default encoding that is assumed when sending and receiving HTTP documents.
 	 * @since MyWebApi 1.0
 	 */
 	public static final String DEFAULT_ENCODING = "UTF-8";
 	
 	/**
-	 * The default request content type used.
+	 * The default content type assumed for the requesting document.
 	 * @since MyWebApi 1.0
 	 */
 	public static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded";
@@ -99,7 +99,7 @@ public class MyHttpWorker extends Thread {
 	/** The connection object that has been constructed. */
 	HttpURLConnection connection;
 	
-	/** Stores the name of the charset encoding to use. */
+	/** Stores the name of the encoding to use. */
 	private String encoding;
 	
 	/** Stores the request's content type. */
