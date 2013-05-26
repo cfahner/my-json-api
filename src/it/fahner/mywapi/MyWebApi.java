@@ -50,6 +50,7 @@ public final class MyWebApi {
 	 */
 	public static void initialize(MyWebConfigs configs) {
 		MyWebApi.configs = configs;
+		listeners = new HashMap<String, ArrayList<MyWebApiListener>>();
 	}
 	
 	/**
