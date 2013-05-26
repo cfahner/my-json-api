@@ -17,8 +17,8 @@
 package it.fahner.mywapi.http;
 
 /**
- * Defines a simple HttpResponse. An instance of this class is returned when an HTTP request
- * has been resolved by this HttpRequestThread. Only exposes the information meaningful to MyWebApi.
+ * Defines a simple HTTP response. An instance of this class is returned when an HTTP request
+ * has been resolved by an {@link HttpRequestThread}. Only exposes the information meaningful to MyWebApi.
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
@@ -36,7 +36,7 @@ public class HttpResponse {
 	}
 	
 	/**
-	 * Returns the amount of milliseconds that this HttpResponse has existed.
+	 * Returns the amount of milliseconds that this {@link HttpResponse} has existed.
 	 * @since MyWebApi 1.0
 	 * @return The amount of milliseconds passed since first instantiation
 	 */
@@ -63,7 +63,7 @@ public class HttpResponse {
 	public String encoding;
 	
 	/**
-	 * Contains the expiration date of the resource. Is zero if unknown.
+	 * Contains the expiration date of the resource. Equals zero if unknown.
 	 * The value is the number of milliseconds since January 1, 1970 GMT.
 	 * @since MyWebApi 1.0
 	 */
@@ -82,7 +82,7 @@ public class HttpResponse {
 	public HttpStatusCode statusCode;
 	
 	/**
-	 * Allows storage of a custom object in this HttpResponse.
+	 * Allows storage of a custom object in this {@link HttpResponse}.
 	 * @since MyWebApi 1.0
 	 */
 	public Object customObject;

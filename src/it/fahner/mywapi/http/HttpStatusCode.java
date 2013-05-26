@@ -57,7 +57,7 @@ public enum HttpStatusCode {
 	private int code;
 	
 	/**
-	 * Creates a new HttpStatus code.
+	 * Creates a new HttpStatusCode.
 	 * @param code The numeric HTTP status code
 	 */
 	private HttpStatusCode(int code) {
@@ -65,7 +65,7 @@ public enum HttpStatusCode {
 	}
 	
 	/**
-	 * Returns the numeric status code of this HttpStatusCode.
+	 * Returns the numeric status code of this {@link HttpStatusCode}.
 	 * @since MyWebApi 1.0
 	 * @return The numeric HTTP status code
 	 */
@@ -87,7 +87,7 @@ public enum HttpStatusCode {
 	}
 	
 	/**
-	 * Returns the HTTP response class this HttpStatusCode belongs to.
+	 * Returns the HTTP response class this {@link HttpStatusCode} belongs to.
 	 * @since MyWebApi 1.0
 	 * @return The HTTP response class this code belongs to
 	 */
@@ -99,8 +99,8 @@ public enum HttpStatusCode {
 	}
 	
 	/**
-	 * Returns an HttpStatusCode based on the status code given.
-	 * @param code The code to return the HttpStatusCode constant for
+	 * Returns an {@link HttpStatusCode} based on the status code given.
+	 * @param code The code to return the {@link HttpStatusCode} constant for
 	 * @return The HttpStatusCode that represents the code specified, returns code 999 if the
 	 *  code specified is not known by this library
 	 */

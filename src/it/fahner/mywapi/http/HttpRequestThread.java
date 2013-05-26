@@ -24,6 +24,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
 
+import javax.net.ssl.HttpsURLConnection;
+
 /**
  * This class sends a single HTTP request and allows you to register a callback to it
  * that notifies you when the request has finished. Uses UTF-8 encoding by default.
@@ -37,6 +39,7 @@ import java.util.Locale;
  * myRun.start(); // to do the actual I/O (asynchronous)<br>
  * </code>
  * </p>
+ * <p>This class uses {@link HttpURLConnection} and {@link HttpsURLConnection} internally.</p>
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
@@ -85,14 +88,15 @@ public class HttpRequestThread extends Thread {
 	private int timeoutMillis;
 	
 	/** Stores the callbacks to invoke when this HttpRequestThread completes its work. */
-	private HttpWorkerListener listener;
+	private HttpRequestListener listener;
 	
 	/**
 	 * Creates a new HttpRequestThread, but does not yet start any networking I/O. Remember to set a
-	 * HttpWorkerListener if you want to be informed about the results. Not specifying a listener
+	 * {@link HttpRequestListener} if you want to be informed about the results. Not specifying a listener
 	 * means this HttpRequestThread will just fire and forget.
 	 * @since MyWebApi 1.0
-	 * @param url The URL to connect to, including the UrlParameters
+	 * @param url The full URL to connect to, including the UrlParameters. Needs to be usable by the
+	 *  {@link URL} class.
 	 */
 	public HttpRequestThread(String url) {
 		encoding = DEFAULT_ENCODING;
@@ -114,12 +118,12 @@ public class HttpRequestThread extends Thread {
 	}
 	
 	/**
-	 * Changes the encoding of the request and response document, default is DEFAULT_ENCODING.
+	 * Changes the encoding of the request and response document, default is {@link #DEFAULT_ENCODING}.
 	 * Modifies the Accept-Charset and Content-Type HTTP headers of the request.
 	 * If the response contains content-encoding information, this will be used to decode the response.
 	 * @since MyWebApi 1.0
 	 * @param encoding The new encoding to set
-	 * @return This HttpRequestThread for call chaining
+	 * @return This {@link HttpRequestThread} for call chaining
 	 */
 	public HttpRequestThread setEncoding(String encoding) {
 		this.encoding = encoding;
@@ -131,7 +135,7 @@ public class HttpRequestThread extends Thread {
 	 * Modifies the Content-Type HTTP header of the request.
 	 * @since MyWebApi 1.0
 	 * @param responseContentType The new content type to use
-	 * @return This HttpRequestThread for call chaining.
+	 * @return This {@link HttpRequestThread} for call chaining.
 	 */
 	public HttpRequestThread setContentType(String contentType) {
 		this.contentType = contentType;
@@ -142,7 +146,7 @@ public class HttpRequestThread extends Thread {
 	 * Specifies the request method of the HTTP request. The default method is GET.
 	 * @since MyWebApi 1.0
 	 * @param requestMethod The new request method to change to
-	 * @return This HttpRequestThread for call chaining
+	 * @return This {@link HttpRequestThread} for call chaining
 	 */
 	public HttpRequestThread setRequestMethod(HttpRequestMethod requestMethod) {
 		this.requestMethod = requestMethod;
@@ -150,11 +154,11 @@ public class HttpRequestThread extends Thread {
 	}
 	
 	/**
-	 * Changes the connection timeout of this HttpRequestThread.
+	 * Changes the connection timeout for this HTTP request.
 	 * <p>Note: some platforms do not allow changing the timeout.</p>
-	 * @since MyWebApy 1.0
+	 * @since MyWebApi 1.0
 	 * @param timeoutMillis The time in milliseconds before timing out
-	 * @return This HttpRequestThread for call chaining
+	 * @return This {@link HttpRequestThread} for call chaining
 	 */
 	public HttpRequestThread setTimeout(int timeoutMillis) {
 		this.timeoutMillis = timeoutMillis;
@@ -165,7 +169,7 @@ public class HttpRequestThread extends Thread {
 	 * Sets the request body to the given value.
 	 * @since MyWebApi 1.0
 	 * @param requestBodyContent The new content to set the request body to
-	 * @return This HttpRequestThread for call chaining
+	 * @return This {@link HttpRequestThread} for call chaining
 	 */
 	public HttpRequestThread setRequestBody(String requestBodyContent) {
 		this.requestBodyContent = requestBodyContent;
@@ -173,12 +177,12 @@ public class HttpRequestThread extends Thread {
 	}
 	
 	/**
-	 * Registers a set of callbacks to be invoked when this HttpRequestThread completes its tasks.
+	 * Registers a set of callbacks to be invoked when this {@link HttpRequestThread} completes its tasks.
 	 * @since MyWebApi 1.0
 	 * @param listener The callbacks to register
-	 * @return This HttpRequestThread for call chaining
+	 * @return This {@link HttpRequestThread} for call chaining
 	 */
-	public HttpRequestThread setMyHttpWorkerListener(HttpWorkerListener listener) {
+	public HttpRequestThread setMyHttpWorkerListener(HttpRequestListener listener) {
 		this.listener = listener;
 		return this;
 	}
@@ -235,11 +239,11 @@ public class HttpRequestThread extends Thread {
 	}
 	
 	/**
-	 * The callbacks to be invoked when a HttpRequestThread has completed it's operations.
+	 * The callbacks to be invoked when a {@link HttpRequestThread} has completed it's operations.
 	 * @since MyWebApi 1.0
 	 * @author C. Fahner <info@fahnerit.com>
 	 */
-	public static interface HttpWorkerListener {
+	public static interface HttpRequestListener {
 		
 		/**
 		 * Called when the work has successfully received a response. Note that this also includes

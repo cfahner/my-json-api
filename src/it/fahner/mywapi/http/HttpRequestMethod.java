@@ -17,7 +17,8 @@
 package it.fahner.mywapi.http;
 
 /**
- * An HTTP request method supported by HttpRequestThread.
+ * An HTTP request method as used by {@link HttpRequestThread}.
+ * You can use the {@link #name()} function to get the request method's {@link String} value.
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */

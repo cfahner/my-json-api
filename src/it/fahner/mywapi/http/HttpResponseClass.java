@@ -17,7 +17,7 @@
 package it.fahner.mywapi.http;
 
 /**
- * Represents a class of HttpResponseCodes.
+ * Represents a classification of {@link HttpResponseCode}s.
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
@@ -65,7 +65,7 @@ public enum HttpResponseClass {
 	}
 	
 	/**
-	 * Returns the lowest code that can be in this HttpResponseClass.
+	 * Returns the lowest code that can be in this {@link HttpResponseClass}.
 	 * @since MyWebApi 1.0
 	 * @return The minimum HTTP status code for this response class
 	 */
@@ -74,7 +74,7 @@ public enum HttpResponseClass {
 	}
 	
 	/**
-	 * Returns the highest code that can be in this HttpResponseClass.
+	 * Returns the highest code that can be in this {@link HttpResponseClass}.
 	 * @since MyWebApi 1.0
 	 * @return The maximum HTTP status code for this response class
 	 */
