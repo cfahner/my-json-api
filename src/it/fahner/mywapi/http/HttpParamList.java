@@ -14,39 +14,50 @@
    limitations under the License.
 */
 
-package it.fahner.mywapi;
+package it.fahner.mywapi.http;
+
 
 import java.util.HashMap;
 
 /**
- * Represents a collection of {@link MyParam}s.
+ * Represents a collection of {@link HttpParam}s.
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
-public class MyParamList {
+public class HttpParamList {
 	
-	/** Contains all {@link MyParam}s, mapped by their parameter name for easy access. */
-	private HashMap<String, MyParam> params;
+	/** Contains all {@link HttpParam}s, mapped by their parameter name for fast access. */
+	private HashMap<String, HttpParam> params;
 	
 	/**
-	 * Creates a new, empty, collection of {@link MyParam}s.
+	 * Creates a new, empty, collection of {@link HttpParam}s.
 	 * @since MyWebApi 1.0
 	 */
-	public MyParamList() {
-		params = new HashMap<String, MyParam>();
+	public HttpParamList() {
+		params = new HashMap<String, HttpParam>();
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder out = new StringBuilder("{HttpParamList: [\n");
+		HttpParam[] all = all();
+		for (int i = 0; i < all.length; i += 1) {
+			out.append(all[i]);
+			if (i != all.length - 1) { out.append(",\n"); }
+		}
+		return out.append("\n] }").toString();
+	}
 	
 	/**
-	 * Merges another list with this list and returns the results as a new {@link MyParamList}.
+	 * Merges another list with this list and returns the results as a new {@link HttpParamList}.
 	 * @since MyWebApi 1.0
 	 * @param other The other list to merge with this one
 	 * @return The resulting list
 	 */
-	public MyParamList merge(MyParamList other) {
-		MyParamList out = new MyParamList();
-		MyParam[] ownParams = all();
-		MyParam[] otherParams = other.all();
+	public HttpParamList merge(HttpParamList other) {
+		HttpParamList out = new HttpParamList();
+		HttpParam[] ownParams = all();
+		HttpParam[] otherParams = other.all();
 		for (int i = 0; i < ownParams.length; i += 1) { out.set(ownParams[i]); }
 		for (int i = 0; i < otherParams.length; i += 1) { out.set(otherParams[i]); }
 		return out;
@@ -64,13 +75,13 @@ public class MyParamList {
 	
 	/**
 	 * Checks if this parameter list contains the specified parameter. This method uses
-	 * {@link MyParam#equals(Object)}.
+	 * {@link HttpParam#equals(Object)}.
 	 * @since MyWebApi 1.0
 	 * @param name The name of the parameter to search for
 	 * @return <code>true</code> if the parameter exists in this list and has the same value
 	 */
-	public boolean has(MyParam param) {
-		MyParam tmp = params.get(param.getName());
+	public boolean has(HttpParam param) {
+		HttpParam tmp = params.get(param.getName());
 		if (tmp == null) { return false; }
 		return tmp.equals(param);
 	}
@@ -82,7 +93,7 @@ public class MyParamList {
 	 * @return The parameter associated to the given name, <code>null</code> when
 	 *  no parameter with that name was found
 	 */
-	public MyParam get(String name) {
+	public HttpParam get(String name) {
 		return params.get(name);
 	}
 	
@@ -91,10 +102,10 @@ public class MyParamList {
 	 * @since MyWebApi 1.0
 	 * @param name The name of the parameter to set
 	 * @param value The value of the parameter to set
-	 * @return This {@link MyParamList} for call chaining
+	 * @return This {@link HttpParamList} for call chaining
 	 */
-	public MyParamList set(String name, String value) {
-		params.put(name, new MyParam(name, value));
+	public HttpParamList set(String name, String value) {
+		params.put(name, new HttpParam(name, value));
 		return this;
 	}
 	
@@ -102,9 +113,9 @@ public class MyParamList {
 	 * Sets a parameter in this list. Overwrites any existing values.
 	 * @since MyWebApi 1.0
 	 * @param param The parameter to set
-	 * @return This {@link MyParamList} for call chaining
+	 * @return This {@link HttpParamList} for call chaining
 	 */
-	public MyParamList set(MyParam param) {
+	public HttpParamList set(HttpParam param) {
 		params.put(param.getName(), param);
 		return this;
 	}
@@ -115,7 +126,7 @@ public class MyParamList {
 	 * @param name The name of the parameter to remove
 	 * @return The parameter that was removed
 	 */
-	public MyParam remove(String name) {
+	public HttpParam remove(String name) {
 		return params.remove(name);
 	}
 	
@@ -124,10 +135,23 @@ public class MyParamList {
 	 * @since MyWebApi 1.0
 	 * @return All parameters contained within this list
 	 */
-	public MyParam[] all() {
-		MyParam[] out = new MyParam[params.size()];
-		params.values().toArray(out);
-		return out;
+	public HttpParam[] all() {
+		return (HttpParam[]) params.values().toArray(new HttpParam[params.size()]);
+	}
+	
+	/**
+	 * Returns this parameter list as a URL encoded string.
+	 * @since MyWebApi 1.0
+	 * @return This parameter list as <code>"?one=valueOne&two=valueTwo"</code>.
+	 *  <p>Returns <code>""</code> when UTF-8 encoding is not supported on this platform.</p>
+	 */
+	public String toUrlQuery() {
+		StringBuilder query = new StringBuilder("?");
+		HttpParam[] all = all();
+		for (int i = 0; i < all.length; i += 1) {
+			query.append(all[i].toUrlEncodedString());
+		}
+		return query.toString();
 	}
 	
 }

@@ -14,14 +14,17 @@
    limitations under the License.
 */
 
-package it.fahner.mywapi;
+package it.fahner.mywapi.http;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * A simple parameter that has a name and a value (which are {@link java.lang.String}s).
  * @author C. Fahner <info@fahnerit.com>
  * @since MyWebApi 1.0
  */
-public class MyParam {
+public class HttpParam {
 
 	/** Contains the parameter name. */
 	private String name;
@@ -35,9 +38,22 @@ public class MyParam {
 	 * @param name The parameter name
 	 * @param value The parameter value
 	 */
-	public MyParam(String name, String value) {
+	public HttpParam(String name, String value) {
 		this.name = name;
 		this.value = value;
+	}
+	
+	@Override
+	public boolean equals(Object arg0) {
+		if (arg0 == null) { return false; }
+		if (!(arg0 instanceof HttpParam)) { return false; }
+		HttpParam param = (HttpParam) arg0;
+		return getName().equals(param.getName()) && getValue().equals(param.getValue());
+	}
+	
+	@Override
+	public String toString() {
+		return "{HttpParam: " + getName() + "=" + getValue() + " }";
 	}
 	
 	/**
@@ -58,12 +74,15 @@ public class MyParam {
 		return value;
 	}
 	
-	@Override
-	public boolean equals(Object arg0) {
-		if (arg0 == null) { return false; }
-		if (!(arg0 instanceof MyParam)) { return false; }
-		MyParam param = (MyParam) arg0;
-		return getName().equals(param.getName()) && getValue().equals(param.getValue());
+	/**
+	 * Returns this parameter in URL encoded form.
+	 * @since MyWebApi 1.0
+	 * @return The encoded parameter as: <code>"name=value"</code>, URL escaped where necessary.
+	 *  Returns <code>""</code> when the platform does not support UTF-8 encoding.
+	 */
+	public String toUrlEncodedString() {
+		try { return URLEncoder.encode(getName(), "UTF-8") + "=" + URLEncoder.encode(getValue(), "UTF-8"); }
+		catch (UnsupportedEncodingException e) { return ""; }
 	}
 	
 }
