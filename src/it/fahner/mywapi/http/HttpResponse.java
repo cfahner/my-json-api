@@ -24,9 +24,6 @@ package it.fahner.mywapi.http;
  */
 public class HttpResponse {
 	
-	/** Contains the timestamp (with milliseconds) of when this object was instantiated. */
-	private long createTime;
-	
 	/**
 	 * Contains the name of the remote resource that this response contains (a URL).
 	 * @since MyWebApi 1.0
@@ -74,9 +71,7 @@ public class HttpResponse {
 	 * Create a new HttpResponse object.
 	 * @since MyWebApi 1.0
 	 */
-	public HttpResponse() {
-		createTime = System.currentTimeMillis();
-	}
+	public HttpResponse() {}
 	
 	@Override
 	public String toString() {
@@ -84,21 +79,15 @@ public class HttpResponse {
 	}
 	
 	/**
-	 * Returns the amount of milliseconds that this {@link HttpResponse} has existed.
+	 * Returns the amount of milliseconds left until this HTTP response expires. This is based on the
+	 * <code>'Expires'</code> header returned by the server and the current {@link HttpStatusCode}.
+	 * @see HttpStatusCode#isAlwaysCacheable() Cacheable HTTP status codes
 	 * @since MyWebApi 1.0
-	 * @return The amount of milliseconds passed since first instantiation
+	 * @return The amount of milliseconds left before this response expires based on server information,
+	 *  always returns <code>0</code> if the current {@link HttpStatusCode} is not reliably cacheable.
 	 */
-	public long getAge() {
-		return System.currentTimeMillis() - createTime;
-	}
-	
-	/**
-	 * Returns the amount of milliseconds left until this HTTP response expires, based on caching
-	 * information returned by the server.
-	 * @since MyWebApi 1.0
-	 * @return The amount of milliseconds left before it expires based on server information
-	 */
-	public long expireTimeLeft() {
+	public long cacheableMillisLeft() {
+		if (!statusCode.isAlwaysCacheable()) { return 0; }
 		long timeLeft = expires - System.currentTimeMillis();
 		return timeLeft > 0 ? timeLeft : 0;
 	}
