@@ -42,8 +42,8 @@ public class HttpParamList {
 		StringBuilder out = new StringBuilder("{HttpParamList: [\n");
 		HttpParam[] all = all();
 		for (int i = 0; i < all.length; i += 1) {
-			out.append(all[i]);
-			if (i != all.length - 1) { out.append(",\n"); }
+			out.append('\t').append(all[i]);
+			if (i != all.length - 1) { out.append("\n"); }
 		}
 		return out.append("\n] }").toString();
 	}

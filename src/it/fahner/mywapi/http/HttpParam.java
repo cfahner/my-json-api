@@ -53,7 +53,7 @@ public class HttpParam {
 	
 	@Override
 	public String toString() {
-		return "{HttpParam: " + getName() + "=" + getValue() + " }";
+		return "{HttpParam: '" + getName() + "=" + getValue() + "' }";
 	}
 	
 	/**
