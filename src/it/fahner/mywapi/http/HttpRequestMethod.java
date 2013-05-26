@@ -42,6 +42,6 @@ public enum HttpRequestMethod {
 	DELETE,
 	
 	/** HTTP's TRACE request method. Some platforms don't allow this method. */
-	TRACE
+	TRACE;
 	
 }
