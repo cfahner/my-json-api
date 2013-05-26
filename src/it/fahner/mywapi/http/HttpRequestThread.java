@@ -235,7 +235,7 @@ public class HttpRequestThread extends Thread {
 	
 	@Override
 	public String toString() {
-		return "{HttpRequestThread.Request => '" + connection.getURL().toString() + "'}";
+		return "{Thread:HttpRequest => URL('" + connection.getURL().toString() + "') }";
 	}
 	
 	/**

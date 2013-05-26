@@ -28,23 +28,6 @@ public class HttpResponse {
 	private long createTime;
 	
 	/**
-	 * Create a new HttpResponse object.
-	 * @since MyWebApi 1.0
-	 */
-	public HttpResponse() {
-		createTime = System.currentTimeMillis();
-	}
-	
-	/**
-	 * Returns the amount of milliseconds that this {@link HttpResponse} has existed.
-	 * @since MyWebApi 1.0
-	 * @return The amount of milliseconds passed since first instantiation
-	 */
-	public long getAge() {
-		return System.currentTimeMillis() - createTime;
-	}
-	
-	/**
 	 * Contains the name of the remote resource that this response contains (a URL).
 	 * @since MyWebApi 1.0
 	 */
@@ -87,9 +70,26 @@ public class HttpResponse {
 	 */
 	public Object customObject;
 	
+	/**
+	 * Create a new HttpResponse object.
+	 * @since MyWebApi 1.0
+	 */
+	public HttpResponse() {
+		createTime = System.currentTimeMillis();
+	}
+	
 	@Override
 	public String toString() {
-		return "{HttpResponse <= '" + requestUrl + "}";
+		return "{HttpResponse <= URL('" + requestUrl + "') }";
+	}
+	
+	/**
+	 * Returns the amount of milliseconds that this {@link HttpResponse} has existed.
+	 * @since MyWebApi 1.0
+	 * @return The amount of milliseconds passed since first instantiation
+	 */
+	public long getAge() {
+		return System.currentTimeMillis() - createTime;
 	}
 	
 }
