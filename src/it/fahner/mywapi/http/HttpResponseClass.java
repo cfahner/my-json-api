@@ -64,6 +64,12 @@ public enum HttpResponseClass {
 		this.minCode = minCode;
 	}
 	
+	@Override
+	public String toString() {
+		return "{HttpResponseClass: " + name() + "(" + getMinimumCode()
+				+ "-" + getMaximumCode() + ") }";
+	}
+	
 	/**
 	 * Returns the lowest code that can be in this {@link HttpResponseClass}.
 	 * @since MyWebApi 1.0

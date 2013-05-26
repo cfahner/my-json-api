@@ -64,6 +64,11 @@ public enum HttpStatusCode {
 		this.code = code;
 	}
 	
+	@Override
+	public String toString() {
+		return "{HttpStatusCode: " + name() + "(" + getCode() + ") }";
+	}
+	
 	/**
 	 * Returns the numeric status code of this {@link HttpStatusCode}.
 	 * @since MyWebApi 1.0

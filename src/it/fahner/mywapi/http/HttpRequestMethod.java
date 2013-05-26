@@ -45,4 +45,9 @@ public enum HttpRequestMethod {
 	/** HTTP's TRACE request method. Some platforms don't allow this method. */
 	TRACE;
 	
+	@Override
+	public String toString() {
+		return "{HttpRequestMethod: '" + name() + "' }";
+	};
+	
 }
