@@ -17,7 +17,7 @@
 package it.fahner.mywapi.http;
 
 /**
- * An HTTP request method supported by HttpWorker.
+ * An HTTP request method supported by HttpRequestThread.
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */

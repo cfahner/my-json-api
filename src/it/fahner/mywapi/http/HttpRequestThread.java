@@ -30,7 +30,7 @@ import java.util.Locale;
  * <p>
  * Usage:<br>
  * <code>
- * HttpWorker myRun = new HttpWorker("http://api/url")<br>
+ * HttpRequestThread myRun = new HttpRequestThread("http://api/url")<br>
  * 		.setRequestBodyContent("content=value")<br>
  * 		.setTimeout(15000) // 15 seconds timeout<br>
  * 		.setListener(this); // supply a listener<br>
@@ -40,7 +40,7 @@ import java.util.Locale;
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
-public class HttpWorker extends Thread {
+public class HttpRequestThread extends Thread {
 	
 	/**
 	 * The default encoding that is assumed when sending and receiving HTTP documents.
@@ -84,17 +84,17 @@ public class HttpWorker extends Thread {
 	/** Contains the timeout in milliseconds after which this request is aborted. */
 	private int timeoutMillis;
 	
-	/** Stores the callbacks to invoke when this HttpWorker completes its work. */
+	/** Stores the callbacks to invoke when this HttpRequestThread completes its work. */
 	private HttpWorkerListener listener;
 	
 	/**
-	 * Creates a new HttpWorker, but does not yet start any networking I/O. Remember to set a
+	 * Creates a new HttpRequestThread, but does not yet start any networking I/O. Remember to set a
 	 * HttpWorkerListener if you want to be informed about the results. Not specifying a listener
-	 * means this HttpWorker will just fire and forget.
+	 * means this HttpRequestThread will just fire and forget.
 	 * @since MyWebApi 1.0
 	 * @param url The URL to connect to, including the UrlParameters
 	 */
-	public HttpWorker(String url) {
+	public HttpRequestThread(String url) {
 		encoding = DEFAULT_ENCODING;
 		contentType = DEFAULT_CONTENT_TYPE;
 		requestMethod = DEFAULT_REQUEST_METHOD;
@@ -119,9 +119,9 @@ public class HttpWorker extends Thread {
 	 * If the response contains content-encoding information, this will be used to decode the response.
 	 * @since MyWebApi 1.0
 	 * @param encoding The new encoding to set
-	 * @return This HttpWorker for call chaining
+	 * @return This HttpRequestThread for call chaining
 	 */
-	public HttpWorker setEncoding(String encoding) {
+	public HttpRequestThread setEncoding(String encoding) {
 		this.encoding = encoding;
 		return this;
 	}
@@ -131,9 +131,9 @@ public class HttpWorker extends Thread {
 	 * Modifies the Content-Type HTTP header of the request.
 	 * @since MyWebApi 1.0
 	 * @param responseContentType The new content type to use
-	 * @return This HttpWorker for call chaining.
+	 * @return This HttpRequestThread for call chaining.
 	 */
-	public HttpWorker setContentType(String contentType) {
+	public HttpRequestThread setContentType(String contentType) {
 		this.contentType = contentType;
 		return this;
 	}
@@ -142,21 +142,21 @@ public class HttpWorker extends Thread {
 	 * Specifies the request method of the HTTP request. The default method is GET.
 	 * @since MyWebApi 1.0
 	 * @param requestMethod The new request method to change to
-	 * @return This HttpWorker for call chaining
+	 * @return This HttpRequestThread for call chaining
 	 */
-	public HttpWorker setRequestMethod(HttpRequestMethod requestMethod) {
+	public HttpRequestThread setRequestMethod(HttpRequestMethod requestMethod) {
 		this.requestMethod = requestMethod;
 		return this;
 	}
 	
 	/**
-	 * Changes the connection timeout of this HttpWorker.
+	 * Changes the connection timeout of this HttpRequestThread.
 	 * <p>Note: some platforms do not allow changing the timeout.</p>
 	 * @since MyWebApy 1.0
 	 * @param timeoutMillis The time in milliseconds before timing out
-	 * @return This HttpWorker for call chaining
+	 * @return This HttpRequestThread for call chaining
 	 */
-	public HttpWorker setTimeout(int timeoutMillis) {
+	public HttpRequestThread setTimeout(int timeoutMillis) {
 		this.timeoutMillis = timeoutMillis;
 		return this;
 	}
@@ -165,20 +165,20 @@ public class HttpWorker extends Thread {
 	 * Sets the request body to the given value.
 	 * @since MyWebApi 1.0
 	 * @param requestBodyContent The new content to set the request body to
-	 * @return This HttpWorker for call chaining
+	 * @return This HttpRequestThread for call chaining
 	 */
-	public HttpWorker setRequestBody(String requestBodyContent) {
+	public HttpRequestThread setRequestBody(String requestBodyContent) {
 		this.requestBodyContent = requestBodyContent;
 		return this;
 	}
 	
 	/**
-	 * Registers a set of callbacks to be invoked when this HttpWorker completes its tasks.
+	 * Registers a set of callbacks to be invoked when this HttpRequestThread completes its tasks.
 	 * @since MyWebApi 1.0
 	 * @param listener The callbacks to register
-	 * @return This HttpWorker for call chaining
+	 * @return This HttpRequestThread for call chaining
 	 */
-	public HttpWorker setMyHttpWorkerListener(HttpWorkerListener listener) {
+	public HttpRequestThread setMyHttpWorkerListener(HttpWorkerListener listener) {
 		this.listener = listener;
 		return this;
 	}
@@ -215,11 +215,12 @@ public class HttpWorker extends Thread {
 			
 			// Create a response object and call the callbacks only when a listener has been specified
 			if (listener == null) { return; }
-			Response response = new Response();
-			if (connection.getContentType() != null) { response.responseContentType = connection.getContentType(); }
-			response.responseEncoding = responseEnctype;
-			response.responseBody = responseBody.toString();
-			response.httpStatusCode = HttpStatusCode.fromCode(connection.getResponseCode());
+			HttpResponse response = new HttpResponse();
+			if (connection.getContentType() != null) { response.contentType = connection.getContentType(); }
+			else { response.contentType = "text/plain"; }
+			response.encoding = responseEnctype;
+			response.body = responseBody.toString();
+			response.statusCode = HttpStatusCode.fromCode(connection.getResponseCode());
 			listener.onWorkerFinished(response);
 		} catch (IOException e) {
 			// If a listener has been set, call it's cancelled method.
@@ -229,63 +230,11 @@ public class HttpWorker extends Thread {
 	
 	@Override
 	public String toString() {
-		return "{HttpWorker.Request => '" + connection.getURL().toString() + "'}";
+		return "{HttpRequestThread.Request => '" + connection.getURL().toString() + "'}";
 	}
 	
 	/**
-	 * Defines a HttpWorker response. An instance of this class is returned when an HTTP request
-	 * has been resolved by this HttpWorker. Only exposes the information meaningful to MyWebApi.
-	 * @since MyWebApi 1.0
-	 * @author C. Fahner <info@fahnerit.com>
-	 */
-	public class Response {
-		
-		/**
-		 * Contains the name of the remote resource that this response contains (a URL).
-		 * @since MyWebApi 1.0
-		 */
-		public String requestUrl = connection.getURL().toExternalForm();
-		
-		/**
-		 * Contains the request method used to retrieve this response.
-		 * @since MyWebApi 1.0
-		 */
-		public HttpRequestMethod requestMethod = HttpWorker.this.requestMethod;
-		
-		/**
-		 * The content type of the response. Assumes "text/plain" when not specified by the response.
-		 * @since MyWebApi 1.0
-		 */
-		public String responseContentType = "text/plain";
-		
-		/**
-		 * The content encoding of the response. Assumes the content encoding of the original request when not
-		 * specified by the response.
-		 * @since MyWebApi 1.0
-		 */
-		public String responseEncoding = encoding;
-		
-		/**
-		 * The content body of the response. Defaults to the empty string.
-		 * @since MyWebApi 1.0
-		 */
-		public String responseBody = "";
-		
-		/**
-		 * The HTTP status code of the response. Defaults to 204 (No Content).
-		 * @since MyWebApi 1.0
-		 */
-		public HttpStatusCode httpStatusCode = HttpStatusCode.NoContent;
-		
-		@Override
-		public String toString() {
-			return "{HttpWorker.Response <= '" + requestUrl + "}";
-		}
-		
-	}
-	
-	/**
-	 * The callbacks to be invoked when a HttpWorker has completed it's operations.
+	 * The callbacks to be invoked when a HttpRequestThread has completed it's operations.
 	 * @since MyWebApi 1.0
 	 * @author C. Fahner <info@fahnerit.com>
 	 */
@@ -297,7 +246,7 @@ public class HttpWorker extends Thread {
 		 * @since MyWebApi 1.0
 		 * @param response The response to the request that was made
 		 */
-		public void onWorkerFinished(Response response);
+		public void onWorkerFinished(HttpResponse response);
 		
 		/**
 		 * Called when the request was cancelled. A request can be cancelled for multiple reasons:
