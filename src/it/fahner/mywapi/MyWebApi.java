@@ -16,6 +16,7 @@
 
 package it.fahner.mywapi;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -41,16 +42,17 @@ public final class MyWebApi {
 	private static MyWebConfigs configs;
 	
 	/** Stores all things that listen to this Api. */
-	private static HashMap<String, ArrayList<MyWebApiListener>> listeners;
+	private static HashMap<String, ArrayList<WeakReference<MyWebApiListener>>> listeners;
 	
 	/**
-	 * Initializes the MyWebApi. It is possible to pass new configurations later.
+	 * Initializes the MyWebApi. You can only call this method once. Use the setter methods provided by
+	 * MyWebApi to change some settings later.
 	 * @since MyWebApi 1.0
 	 * @param configs Configurations to use from now on
 	 */
 	public static void initialize(MyWebConfigs configs) {
 		MyWebApi.configs = configs;
-		listeners = new HashMap<String, ArrayList<MyWebApiListener>>();
+		listeners = new HashMap<String, ArrayList<WeakReference<MyWebApiListener>>>();
 	}
 	
 	/**
@@ -62,38 +64,24 @@ public final class MyWebApi {
 	public static void startListening(MyWebApiListener listener) {
 		forceInit();
 		String cls = listener.getClass().getName();
-		ArrayList<MyWebApiListener> activeListeners = listeners.get(cls);
-		if (activeListeners == null) { activeListeners = new ArrayList<MyWebApiListener>(); }
-		activeListeners.add(listener);
+		ArrayList<WeakReference<MyWebApiListener>> activeListeners = listeners.get(cls);
+		if (activeListeners == null) { activeListeners = new ArrayList<WeakReference<MyWebApiListener>>(); }
+		activeListeners.add(new WeakReference<MyWebApiListener>(listener));
 		listeners.put(cls, activeListeners);
 	}
 	
 	/**
-	 * Stops a listener from receiving any updates about the MyRequests it sends.
-	 * @since MyWebApi 1.0
-	 * @param listener The listener that should no longer receive updates
+	 * Shorthand getter for getting the Api location.
+	 * @return The URL that points to the API
 	 */
-	public static void stopListening(MyWebApiListener listener) {
+	private static String getBaseURL() {
 		forceInit();
-		String cls = listener.getClass().getName();
-		ArrayList<MyWebApiListener> activeListeners = listeners.get(cls);
-		if (activeListeners == null) { return; } // no listeners anyway
-		activeListeners.remove(listener);
-		if (activeListeners.size() > 0) { listeners.put(cls, activeListeners); }
-		else { listeners.remove(cls); }
+		return configs.getLocation();
 	}
 	
-	private static MyWebConfigs getConfigs() {
-		forceInit();
-		return configs;
-	}
-	
+	/** Forces an initialization to have happened. */
 	private static void forceInit() {
 		if (configs == null) { throw new RuntimeException("MyWebApi not initialized!"); }
-	}
-	
-	private static String getLocation() {
-		return getConfigs().getLocation();
 	}
 	
 }
