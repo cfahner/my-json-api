@@ -198,13 +198,16 @@ public class HttpRequestThread extends Thread {
 			connection.setRequestProperty("Content-Length", "" + Integer.toString(requestBodyContent.getBytes().length));
 			connection.setConnectTimeout(timeoutMillis);
 			
-			// Send request
-			DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-			writer.writeBytes(requestBodyContent);
-			writer.flush();
-			writer.close();
+			// Send the request body (if a body content was specified)
+			if (requestBodyContent != null && requestBodyContent.length() > 0) {
+				DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+				writer.writeBytes(requestBodyContent);
+				writer.flush();
+				writer.close();
+			}
 			
 			// Get response
+			connection.connect(); // call connect just to be sure, will be ignored if already called anyways
 			String responseEnctype = connection.getContentEncoding();
 			if (responseEnctype == null) { responseEnctype = encoding; }
 			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), responseEnctype));
