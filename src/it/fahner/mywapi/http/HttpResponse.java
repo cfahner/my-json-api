@@ -24,6 +24,26 @@ package it.fahner.mywapi.http;
  */
 public class HttpResponse {
 	
+	/** Contains the timestamp (with milliseconds) of when this object was instantiated. */
+	private long createTime;
+	
+	/**
+	 * Create a new HttpResponse object.
+	 * @since MyWebApi 1.0
+	 */
+	public HttpResponse() {
+		createTime = System.currentTimeMillis();
+	}
+	
+	/**
+	 * Returns the amount of milliseconds that this HttpResponse has existed.
+	 * @since MyWebApi 1.0
+	 * @return The amount of milliseconds passed since first instantiation
+	 */
+	public long getAge() {
+		return System.currentTimeMillis() - createTime;
+	}
+	
 	/**
 	 * Contains the name of the remote resource that this response contains (a URL).
 	 * @since MyWebApi 1.0
@@ -41,6 +61,13 @@ public class HttpResponse {
 	 * @since MyWebApi 1.0
 	 */
 	public String encoding;
+	
+	/**
+	 * Contains the expiration date of the resource. Is zero if unknown.
+	 * The value is the number of milliseconds since January 1, 1970 GMT.
+	 * @since MyWebApi 1.0
+	 */
+	public long expires;
 	
 	/**
 	 * The content body of the response.

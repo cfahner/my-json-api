@@ -221,6 +221,7 @@ public class HttpRequestThread extends Thread {
 			response.encoding = responseEnctype;
 			response.body = responseBody.toString();
 			response.statusCode = HttpStatusCode.fromCode(connection.getResponseCode());
+			response.expires = connection.getExpiration();
 			listener.onWorkerFinished(response);
 		} catch (IOException e) {
 			// If a listener has been set, call it's cancelled method.
