@@ -132,10 +132,11 @@ public class MyHttpWorker extends Thread {
 		timeoutMillis = DEFAULT_TIMEOUT;
 		try {
 			connection = (HttpURLConnection) new URL(url).openConnection();
-			connection.setUseCaches(false);
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 			HttpURLConnection.setFollowRedirects(true);
+			// we will implement our own caching since this is not reliable on every platform
+			connection.setUseCaches(false);
 		} catch (Exception e) {
 			// Probably a malformed url exception, no exceptions should occur here anyways so crash the application
 			MyLog.warn("Could not create HTTP worker thread!");
