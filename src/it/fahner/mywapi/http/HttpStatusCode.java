@@ -82,7 +82,7 @@ public enum HttpStatusCode {
 	 * Checks if this status code is always cacheable. This checks for the codes:
 	 * 200, 203, 204, 205, 300, 301 and 410.
 	 * @since MyWebApi 1.0
-	 * @return TRUE if the status code allows for caching, FALSE if uncertain
+	 * @return <code>true</code> if the status code allows for caching, <code>false</code> if uncertain
 	 */
 	public boolean isAlwaysCacheable() {
 		switch (code) {
