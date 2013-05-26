@@ -219,7 +219,7 @@ public class HttpWorker extends Thread {
 			if (connection.getContentType() != null) { response.responseContentType = connection.getContentType(); }
 			response.responseEncoding = responseEnctype;
 			response.responseBody = responseBody.toString();
-			response.httpStatusCode = connection.getResponseCode();
+			response.httpStatusCode = HttpStatusCode.fromCode(connection.getResponseCode());
 			listener.onWorkerFinished(response);
 		} catch (IOException e) {
 			// If a listener has been set, call it's cancelled method.
@@ -275,7 +275,7 @@ public class HttpWorker extends Thread {
 		 * The HTTP status code of the response. Defaults to 204 (No Content).
 		 * @since MyWebApi 1.0
 		 */
-		public int httpStatusCode = 204;
+		public HttpStatusCode httpStatusCode = HttpStatusCode.NoContent;
 		
 		@Override
 		public String toString() {
