@@ -135,6 +135,7 @@ public class MyHttpWorker extends Thread {
 			connection.setUseCaches(false);
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
+			HttpURLConnection.setFollowRedirects(true);
 		} catch (Exception e) {
 			// Probably a malformed url exception, no exceptions should occur here anyways so crash the application
 			MyLog.warn("Could not create HTTP worker thread!");
