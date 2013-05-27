@@ -16,20 +16,20 @@
 
 package it.fahner.mywapi;
 
+import it.fahner.mywapi.http.HttpParamList;
 import it.fahner.mywapi.http.HttpRequestThread;
+import it.fahner.mywapi.http.HttpRequestThread.HttpRequestWorkerListener;
+import it.fahner.mywapi.http.HttpResponse;
 
-import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * The main entry point for the MyWebApi library. All requests, threads, caches and listeners
  * are managed here.
  * <p>Most basic instantiation:</p>
  * <p><code>
- * MyWebApi apiInstance = new MyWebApi(new MyWebConfigs("http://hostname.com/api/location/"));
+ * MyWebApi apiInstance = new MyWebApi("http://hostname.com/api/location/");
  * </code></p>
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
@@ -42,43 +42,65 @@ public class MyWebApi {
 	 */
 	public static final String VERSION = "1.0";
 	
-	/** Contains the initialization information. */
-	private MyWebConfigs configs;
+	/** Contains the base URL of this MyWebApi. */
+	private String baseUrl;
 	
-	/** Stores all things that listen to this API. */
-	private ArrayList<WeakReference<MyWebApiListener>> listeners;
+	/** Contains all URL parameters that need to be included in every request. */
+	private HttpParamList persistentUrlParams;
 	
-	/** Stores the unique HttpRequest identifiers for all currently open requests. */
-	private HashSet<String> requests;
+	/** Contains the time in milliseconds before a single request is cancelled. */
+	private int timeoutMillis;
+	
+	/** Flag indicating if this class should use a cache. */
+	private boolean useCache;
+	
+	/** Stores all registered {@link MyWebApiListener}s. */
+	private MyWebApiListenerCollection listeners;
+	
+	/** Keeps track of all currently opened requests. */
+	private MyOpenRequestsTracker openRequests;
 	
 	/**
 	 * Creates a new access point to a web-based API.
+	 * @since MyWebApi 1.0
+	 * @param configs A configurations object for this API
 	 */
-	public MyWebApi(MyWebConfigs configs) {
-		this.configs = configs;
-		listeners = new ArrayList<WeakReference<MyWebApiListener>>();
+	public MyWebApi(String baseUrl) {
+		this.baseUrl = baseUrl;
+		this.persistentUrlParams = new HttpParamList();
+		this.timeoutMillis = HttpRequestThread.DEFAULT_TIMEOUT;
+		this.listeners = new MyWebApiListenerCollection();
+		this.openRequests = new MyOpenRequestsTracker();
 	}
 	
 	public HttpRequestThread convertToHttpRequest(MyRequest myReq) {
-		String urlToUse = getBaseURL();
+		String urlToUse = baseUrl;
+		String query = myReq.getUrlParameters().merge(persistentUrlParams).toUrlQuery();
 		try {
-			URL url = new URL(getBaseURL() + myReq.getPath());
+			// Try to use the base URL + the path specified by the request + the query
+			urlToUse = myReq.getPath() != null
+					? new URL(urlToUse + myReq.getPath() + query).toExternalForm()
+					: new URL(urlToUse + query).toExternalForm();
 		} catch (MalformedURLException e) {
-			System.err.println("MyWebApi: malformed URL, reverting to base URL");
+			// If base+path+query is malformed, just use base+query, which (if malformed) will fail
+			// automatically when it is passed to the HttpRequestThread
+			System.err.println("MyWebApi: malformed full URL, reverting to base URL");
+			urlToUse += query;
 		}
-		HttpRequestThread out = new HttpRequestThread(urlToUse);
-		
+		HttpRequestThread out = new HttpRequestThread(urlToUse)
+			.setTimeout(timeoutMillis);
+		if (myReq.getRequestMethod() != null) { out.setRequestMethod(myReq.getRequestMethod()); }
+		if (myReq.getBodyParameters() != null) { out.setRequestBody(myReq.getBodyParameters().toUrlQuery()); }
 		return out;
 	}
 	
 	/**
-	 * Registers a listener to MyWebApi. The listener will (from now on) receive updates
-	 * from MyWebApi when MyRequests sent by that listener are resolved.
+	 * Registers a callback to be invoked when any MyRequests are resolved.
 	 * @since MyWebApi 1.0
-	 * @param listener The listener to register
+	 * @param listener The callback to register
 	 */
-	public void startListening(MyWebApiListener listener) {
-		listeners.add(new WeakReference<MyWebApiListener>(listener));
+	public synchronized void startListening(MyWebApiListener listener) {
+		listeners.put(listener);
 	}
 	
 	/**
@@ -87,19 +109,76 @@ public class MyWebApi {
 	 * <p>If MyWebApi is still waiting for another request that points to the same resource (to the same URL
 	 * with the same parameters), no new request will be started.</p>
 	 * <p>If an response is stored in the cache and has not yet expired, that response is returned
-	 * instead of sending a new request.</p>
+	 * instead of sending a new request (unless the cache is disabled).</p>
+	 * <p>The encoding used for the body of the request sent is {@link HttpRequestThread#CHARSET}.</p>
+	 * <p>The content type of the request is {@link HttpRequestThread#DEFAULT_CONTENT_TYPE}.</p>
+	 * @since MyWebApi 1.0
 	 * @param request An implementation of MyRequest that needs to be resolved
 	 */
-	public void startRequest(MyRequest request) {
-		
+	public void startRequest(final MyRequest request) {
+		final HttpRequestThread newReq = convertToHttpRequest(request);
+		if (openRequests.isOpen(newReq)) { return; }
+		// TODO: if (cache.has && useCache) { .. invoke immediately }
+		openRequests.storeRequest(newReq);
+		// attach a listener that simply closes the request from this end and invokes the complete/fail method
+		// of the request when it has been resolved
+		newReq.setHttpRequestWorkerListener(new HttpRequestWorkerListener() {
+			
+			@Override
+			public void onWorkerFinished(HttpResponse response) {
+				request.complete(response);
+				openRequests.removeRequest(newReq);
+				// TODO: check cache time and add response to cache if needed
+				listeners.invokeAll(request);
+			}
+			
+			@Override
+			public void onWorkerCancelled() {
+				request.fail();
+				openRequests.removeRequest(newReq);
+				listeners.invokeAll(request);
+			}
+		});
+		newReq.start();
 	}
 	
 	/**
-	 * Shorthand getter for getting the Api location.
-	 * @return The URL that points to the API
+	 * Sets a URL parameter that is included with every request.
+	 * @since MyWebApi 1.0
+	 * @param name The name of the parameter to set
+	 * @param value The value of the parameter to set
 	 */
-	private String getBaseURL() {
-		return configs.getBaseUrl();
+	public void setPersistentUrlParameter(String name, String value) {
+		this.persistentUrlParams.set(name, value);
+	}
+	
+	/**
+	 * Removes a parameter from the list of persistent URL parameters. This parameter
+	 * will no longer be included with every request.
+	 * @since MyWebApi 1.0
+	 * @param name The name of the parameter to remove
+	 */
+	public void removePersistentUrlParameter(String name) {
+		this.persistentUrlParams.remove(name);
+	}
+	
+	/**
+	 * Sets the amount of time to wait before a request is cancelled.
+	 * @since MyWebApi 1.0
+	 * @param milliseconds Amount of time to wait in milliseconds
+	 */
+	public void setTimeout(int milliseconds) {
+		this.timeoutMillis = milliseconds;
+	}
+	
+	/**
+	 * Changes the enabled state of the cache
+	 * @since MyWebApi 1.0
+	 * @param enable <code>true</code> if you want to enable the cache, <code>false</code> to
+	 *  disable
+	 */
+	public void setCacheEnabled(boolean enable) {
+		this.useCache = enable;
 	}
 	
 }

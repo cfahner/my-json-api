@@ -10,10 +10,12 @@ The library's goals are:
 * Persist callbacks / listeners across multiple instances of the same class
   (Android recreates instances when the device is rotated, for example)
 * Built-in caching (that is only there when you need it)
-* Abstract away all of the Java boilerplate code normally needed when doing
-  (HTTP) networking I/O.
 * Library usage is cleary visible while scanning source code (everything is
   prefixed with "My")
+
+Things to consider before using this library:
+
+* Uses UTF-8 encoding exclusively
 
 How to include
 --------------
@@ -25,3 +27,9 @@ Usage example
 -------------
 
 TODO
+
+Wishlist
+--------
+
+* Automatic queue creation. If the platform tells MyWebApi that all requests should be queued from now on,
+  it should queue all incoming requests until the platform tells MyWebApi to process the queue.

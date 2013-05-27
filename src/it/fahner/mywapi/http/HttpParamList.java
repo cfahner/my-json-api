@@ -140,18 +140,29 @@ public class HttpParamList {
 	}
 	
 	/**
-	 * Returns this parameter list as a URL encoded string.
+	 * Returns this parameter list as a URL query.
 	 * @since MyWebApi 1.0
 	 * @return This parameter list as <code>"?one=valueOne&two=valueTwo"</code>.
 	 *  <p>Returns <code>""</code> when UTF-8 encoding is not supported on this platform.</p>
 	 */
 	public String toUrlQuery() {
-		StringBuilder query = new StringBuilder("?");
+		return "?" + toUrlEncodedString();
+	}
+	
+	/**
+	 * Returns this parameter list as an URL encoded string.
+	 * @since MyWebApi 1.0
+	 * @return This parameter list as <code>"one=valOne&two=valTwo"</code>.
+	 *  <p>Returns <code>""</code> when UTF-8 encoding is not supported on this platform.</p>
+	 */
+	public String toUrlEncodedString() {
+		StringBuilder out = new StringBuilder();
 		HttpParam[] all = all();
 		for (int i = 0; i < all.length; i += 1) {
-			query.append(all[i].toUrlEncodedString());
+			out.append(all[i].toUrlEncodedString());
+			if (i != (all.length - 1)) { out.append("&"); }
 		}
-		return query.toString();
+		return out.toString();
 	}
 	
 }

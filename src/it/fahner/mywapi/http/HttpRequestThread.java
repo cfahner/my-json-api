@@ -18,6 +18,7 @@ package it.fahner.mywapi.http;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -46,22 +47,17 @@ import javax.net.ssl.HttpsURLConnection;
 public class HttpRequestThread extends Thread {
 	
 	/**
-	 * The default encoding that is assumed when sending and receiving HTTP documents.
+	 * The encoding used when sending and receiving HTTP documents. If the HTTP response
+	 * specifies it's own encoding, that encoding will be used.
 	 * @since MyWebApi 1.0
 	 */
-	public static final String DEFAULT_ENCODING = "UTF-8";
+	public static final String CHARSET = "UTF-8";
 	
 	/**
-	 * The default content type assumed for the requesting document.
+	 * The content type of the HTTP request.
 	 * @since MyWebApi 1.0
 	 */
-	public static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded";
-	
-	/**
-	 * The default request method used.
-	 * @since MyWebApi 1.0
-	 */
-	public static final HttpRequestMethod DEFAULT_REQUEST_METHOD = HttpRequestMethod.GET;
+	public static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
 	
 	/**
 	 * The default timeout in milliseconds of an HTTP request.
@@ -71,12 +67,6 @@ public class HttpRequestThread extends Thread {
 	
 	/** The connection object that has been constructed. */
 	HttpURLConnection connection;
-	
-	/** Stores the name of the encoding to use. */
-	private String encoding;
-	
-	/** Stores the request's content type. */
-	private String contentType;
 	
 	/** Stores the current request method. */
 	private HttpRequestMethod requestMethod;
@@ -88,20 +78,18 @@ public class HttpRequestThread extends Thread {
 	private int timeoutMillis;
 	
 	/** Stores the callbacks to invoke when this HttpRequestThread completes its work. */
-	private HttpRequestListener listener;
+	private HttpRequestWorkerListener listener;
 	
 	/**
 	 * Creates a new HttpRequestThread, but does not yet start any networking I/O. Remember to set a
-	 * {@link HttpRequestListener} if you want to be informed about the results. Not specifying a listener
+	 * {@link HttpRequestWorkerListener} if you want to be informed about the results. Not specifying a listener
 	 * means this HttpRequestThread will just fire and forget.
 	 * @since MyWebApi 1.0
 	 * @param url The full URL to connect to, including the UrlParameters. Needs to be usable by the
 	 *  {@link URL} class.
 	 */
 	public HttpRequestThread(String url) {
-		encoding = DEFAULT_ENCODING;
-		contentType = DEFAULT_CONTENT_TYPE;
-		requestMethod = DEFAULT_REQUEST_METHOD;
+		requestMethod = HttpRequestMethod.GET;
 		requestBodyContent = "";
 		timeoutMillis = DEFAULT_TIMEOUT;
 		try {
@@ -117,29 +105,21 @@ public class HttpRequestThread extends Thread {
 		}
 	}
 	
-	/**
-	 * Changes the encoding of the request and response document, default is {@link #DEFAULT_ENCODING}.
-	 * Modifies the Accept-Charset and Content-Type HTTP headers of the request.
-	 * If the response contains content-encoding information, this will be used to decode the response.
-	 * @since MyWebApi 1.0
-	 * @param encoding The new encoding to set
-	 * @return This {@link HttpRequestThread} for call chaining
-	 */
-	public HttpRequestThread setEncoding(String encoding) {
-		this.encoding = encoding;
-		return this;
+	@Override
+	public String toString() {
+		return "{Thread:HttpRequest => URL('" + connection.getURL().toString() + "') }";
 	}
 	
 	/**
-	 * Changes the content type of the requesting document. Default is DEFAULT_CONTENT_TYPE.
-	 * Modifies the Content-Type HTTP header of the request.
+	 * Returns a string that uniquely represents the remote resource being resolved by
+	 * this HTTP request. Requests with the same resource identity value are in practice
+	 * the same requests.
 	 * @since MyWebApi 1.0
-	 * @param responseContentType The new content type to use
-	 * @return This {@link HttpRequestThread} for call chaining.
+	 * @return A string that uniquely identifies the remote resource
 	 */
-	public HttpRequestThread setContentType(String contentType) {
-		this.contentType = contentType;
-		return this;
+	public String getResourceIdentity() {
+		return "{WebResId:" + requestMethod.name() + "::" + connection.getURL().toExternalForm()
+				+ "(" + requestBodyContent + ")}";
 	}
 	
 	/**
@@ -182,7 +162,7 @@ public class HttpRequestThread extends Thread {
 	 * @param listener The callbacks to register
 	 * @return This {@link HttpRequestThread} for call chaining
 	 */
-	public HttpRequestThread setMyHttpWorkerListener(HttpRequestListener listener) {
+	public HttpRequestThread setHttpRequestWorkerListener(HttpRequestWorkerListener listener) {
 		this.listener = listener;
 		return this;
 	}
@@ -192,9 +172,9 @@ public class HttpRequestThread extends Thread {
 		try {
 			// Specify the proper values just before sending the request
 			connection.setRequestMethod(requestMethod.name());
-			connection.setRequestProperty("Accept-Charset", encoding);
-			connection.setRequestProperty("Content-Type", contentType + "; charset="
-					+ encoding.toLowerCase(Locale.ENGLISH));
+			connection.setRequestProperty("Accept-Charset", CHARSET);
+			connection.setRequestProperty("Content-Type", CONTENT_TYPE + "; charset="
+					+ CHARSET.toLowerCase(Locale.ENGLISH));
 			connection.setRequestProperty("Content-Length", "" + Integer.toString(requestBodyContent.getBytes().length));
 			connection.setConnectTimeout(timeoutMillis);
 			
@@ -209,7 +189,7 @@ public class HttpRequestThread extends Thread {
 			// Get response
 			connection.connect(); // call connect just to be sure, will be ignored if already called anyways
 			String responseEnctype = connection.getContentEncoding();
-			if (responseEnctype == null) { responseEnctype = encoding; }
+			if (responseEnctype == null) { responseEnctype = CHARSET; }
 			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), responseEnctype));
 			String line;
 			StringBuilder responseBody = connection.getContentLength() > 0
@@ -230,15 +210,21 @@ public class HttpRequestThread extends Thread {
 			response.statusCode = HttpStatusCode.fromCode(connection.getResponseCode());
 			response.expires = connection.getExpiration();
 			listener.onWorkerFinished(response);
+		} catch (FileNotFoundException fnfe) {
+			// This exception is thrown in case of a 404, which we want to use as a successful
+			// response with a 404 status code
+			if (listener == null) { return; }
+			HttpResponse response = new HttpResponse();
+			response.encoding = CHARSET;
+			response.body = "";
+			response.statusCode = HttpStatusCode.NotFound;
+			response.expires = 0;
+			listener.onWorkerFinished(response);
 		} catch (IOException e) {
 			// If a listener has been set, call it's cancelled method.
+			System.err.println("MyWebApi RequestError: " + e.getMessage());
 			if (listener != null) { listener.onWorkerCancelled(); }
 		}
-	}
-	
-	@Override
-	public String toString() {
-		return "{Thread:HttpRequest => URL('" + connection.getURL().toString() + "') }";
 	}
 	
 	/**
@@ -246,7 +232,7 @@ public class HttpRequestThread extends Thread {
 	 * @since MyWebApi 1.0
 	 * @author C. Fahner <info@fahnerit.com>
 	 */
-	public static interface HttpRequestListener {
+	public static interface HttpRequestWorkerListener {
 		
 		/**
 		 * Called when the work has successfully received a response. Note that this also includes
