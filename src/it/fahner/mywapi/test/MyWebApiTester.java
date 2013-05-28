@@ -2,21 +2,23 @@ package it.fahner.mywapi.test;
 
 import it.fahner.mywapi.MyRequest;
 import it.fahner.mywapi.MyWebApi;
-import it.fahner.mywapi.http.HttpParamList;
-import it.fahner.mywapi.http.HttpRequestMethod;
+import it.fahner.mywapi.MyWebApiListener;
 import it.fahner.mywapi.http.HttpResponse;
+import it.fahner.mywapi.http.types.HttpParamList;
+import it.fahner.mywapi.http.types.HttpRequestMethod;
 
 /**
  * Use this for testing.
  * @author Christiaan
  *
  */
-public class MyWebApiTestClient {
+public class MyWebApiTester {
 
 	public static void main(String[] args) {
-		MyWebApi api = new MyWebApi("http://www.fahnerit.com/api/quizit/");
+		final MyWebApi api = new MyWebApi("http://www.fahnerit.com/api/quizit/");
 		
-		MyRequest sample = new MyRequest() {
+		final boolean secondOne = false;
+		final MyRequest sample = new MyRequest() {
 			
 			@Override
 			public HttpParamList getUrlParameters() {
@@ -45,12 +47,11 @@ public class MyWebApiTestClient {
 			
 			@Override
 			public long getCacheTime() {
-				// TODO Auto-generated method stub
-				return 0;
+				return 600000;
 			}
 			
 			@Override
-			public HttpParamList getBodyParameters() {
+			public String getBody() {
 				// TODO Auto-generated method stub
 				return null;
 			}
@@ -62,9 +63,31 @@ public class MyWebApiTestClient {
 			
 			@Override
 			public void complete(HttpResponse response) {
-				System.out.println(response.body);
+				System.out.println(response.getCreateTime());
 			}
 		};
+		
+		api.startListening(new MyWebApiListener() {
+			
+			@Override
+			public void onRequestResolved(MyRequest request) {
+				System.out.println(request.getUrlParameters());
+				try {
+					Thread.sleep(250);
+					api.startRequest(sample);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			@Override
+			public void onContentInvalidated(String contentName) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 		api.startRequest(sample);
 	}
 	
