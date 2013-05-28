@@ -23,7 +23,7 @@ import java.util.HashMap;
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
-public class HttpParamList {
+public final class HttpParamList {
 	
 	/** Contains all {@link HttpParam}s, mapped by their parameter name for fast access. */
 	private HashMap<String, HttpParam> params;

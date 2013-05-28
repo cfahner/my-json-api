@@ -24,7 +24,7 @@ import java.net.URLEncoder;
  * @author C. Fahner <info@fahnerit.com>
  * @since MyWebApi 1.0
  */
-public class HttpParam {
+public final class HttpParam {
 
 	/** Contains the parameter name. */
 	private String name;
