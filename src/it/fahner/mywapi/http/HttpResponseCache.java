@@ -67,6 +67,15 @@ public final class HttpResponseCache {
 	}
 	
 	/**
+	 * Returns the amount of HTTP responses currently in the cache.
+	 * @since MyWebApi 1.0
+	 * @return Amount of cached responses
+	 */
+	public synchronized int size() {
+		return cache.size();
+	}
+	
+	/**
 	 * Cleans all cached elements that have expired.
 	 */
 	private synchronized void clean() {
