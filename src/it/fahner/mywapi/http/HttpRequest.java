@@ -34,7 +34,7 @@ import java.util.Locale;
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
-public class HttpRequest {
+public final class HttpRequest {
 	
 	/**
 	 * Constant that represents the string encoding method used for all requests.
@@ -148,6 +148,7 @@ public class HttpRequest {
 			
 			// Build the response and return it
 			return new HttpResponse(
+					this,
 					HttpStatusCode.fromCode(connection.getResponseCode()),
 					responseBody.toString(),
 					new HttpContentType(
@@ -156,7 +157,7 @@ public class HttpRequest {
 					), connection.getExpiration()
 			);
 		} catch (FileNotFoundException fnfe) {
-			return new HttpResponse(HttpStatusCode.NotFound);
+			return new HttpResponse(this, HttpStatusCode.NotFound);
 		} catch (IOException ioe) { throw new HttpRequestTimeoutException(); }
 	}
 	

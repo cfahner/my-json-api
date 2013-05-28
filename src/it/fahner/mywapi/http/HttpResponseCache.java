@@ -45,13 +45,12 @@ public final class HttpResponseCache {
 	/**
 	 * Caches an HTTP response for a specific amount of time.
 	 * @since MyWebApi 1.0
-	 * @param key The request used to retrieve the response
-	 * @param response The response to store (this is actually cached)
+	 * @param response The response to store in the cache
 	 * @param expireAfter The amount of time to store the response (in milliseconds)
 	 */
-	public synchronized void store(HttpRequest request, HttpResponse response, long expireAfter) {
-		cache.put(request.getResourceIdentity(), response);
-		expireTimes.put(request.getResourceIdentity(), System.currentTimeMillis() + expireAfter);
+	public synchronized void store(HttpResponse response, long expireAfter) {
+		cache.put(response.getRequestMade().getResourceIdentity(), response);
+		expireTimes.put(response.getRequestMade().getResourceIdentity(), System.currentTimeMillis() + expireAfter);
 	}
 	
 	/**

@@ -26,6 +26,9 @@ import it.fahner.mywapi.http.types.HttpStatusCode;
  */
 public final class HttpResponse {
 	
+	/** A reference to the original request made. */
+	private HttpRequest request;
+	
 	/** Contains the HTTP status code of the response. */
 	private HttpStatusCode status;
 	
@@ -41,29 +44,30 @@ public final class HttpResponse {
 	/**
 	 * Creates a new simple HTTP response representation.
 	 * @since MyWebApi 1.0
+	 * @param request The request that was made to get this response
 	 * @param status The status code of this response
 	 * @param body The response body
-	 * @param ctype The content type of the body
-	 * @param enctype The character encoding used
+	 * @param contentType The HTTP content type of this response
 	 * @param expires The timestamp for when this response is supposed to expire (in millis since 1970)
 	 */
-	public HttpResponse(HttpStatusCode status, String body, HttpContentType contentType, long expires) {
+	public HttpResponse(HttpRequest request, HttpStatusCode status, String body, HttpContentType contentType, long expires) {
+		this.request = request;
 		this.status = status;
 		this.body = body;
 		this.contentType = contentType;
 		this.expires = expires;
 	}
 	
-	public HttpResponse(HttpStatusCode status, String body, HttpContentType contentType) {
-		this(status, body, contentType, 0);
+	public HttpResponse(HttpRequest request, HttpStatusCode status, String body, HttpContentType contentType) {
+		this(request, status, body, contentType, 0);
 	}
 	
-	public HttpResponse(HttpStatusCode status, String body) {
-		this(status, body, new HttpContentType("text/plain"));
+	public HttpResponse(HttpRequest request, HttpStatusCode status, String body) {
+		this(request, status, body, new HttpContentType("text/plain"));
 	}
 	
-	public HttpResponse(HttpStatusCode status) {
-		this(status, "");
+	public HttpResponse(HttpRequest request, HttpStatusCode status) {
+		this(request, status, "");
 	}
 	
 	@Override
@@ -122,6 +126,15 @@ public final class HttpResponse {
 		if (!status.isAlwaysCacheable()) { return 0; }
 		long timeLeft = expires - System.currentTimeMillis();
 		return timeLeft > 0 ? timeLeft : 0;
+	}
+	
+	/**
+	 * Returns the request that was made to get this response.
+	 * @since MyWebApi 1.0
+	 * @return The {@link HttpRequest} that was made to get this response
+	 */
+	public HttpRequest getRequestMade() {
+		return request;
 	}
 	
 }
