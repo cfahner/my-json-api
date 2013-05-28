@@ -41,3 +41,5 @@ Things not yet implemented
 2.  Automatic queue creation. If the platform tells MyWebApi that all requests should be queued from now on,
     it should queue all incoming requests until the platform tells MyWebApi to process the queue. This is
 	useful when the connection is down for example.
+3.  Built-in JSON support (and a JSON request base class)
+4.  Automatic cache serialization (right now you have to serialize the MyWebCache instance manually)
