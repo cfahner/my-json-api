@@ -14,14 +14,14 @@
    limitations under the License.
 */
 
-package it.fahner.mywapi.http;
+package it.fahner.mywapi.http.types;
 
 /**
- * Represents a classification of {@link HttpResponseCode}s.
+ * Represents a classification of {@link HttpStatusCode}s.
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
-public enum HttpResponseClass {
+public enum HttpStatusCodeClass {
 	
 	/**
 	 * 1xx Informational HTTP response class.
@@ -53,25 +53,25 @@ public enum HttpResponseClass {
 	 */
 	SERVER_ERROR(500);
 	
-	/** Stores the minimum http status code this HttpResponseClass represents. */
+	/** Stores the minimum http status code this HttpStatusCodeClass represents. */
 	private int minCode;
 	
 	/**
-	 * Create a new HttpResponseClass.
+	 * Create a new HttpStatusCodeClass.
 	 * @param minCode The minimum HTTP status code for this class
 	 */
-	private HttpResponseClass(int minCode) {
+	private HttpStatusCodeClass(int minCode) {
 		this.minCode = minCode;
 	}
 	
 	@Override
 	public String toString() {
-		return "{HttpResponseClass: " + name() + "(" + getMinimumCode()
+		return "{HttpStatusCodeClass: " + name() + "(" + getMinimumCode()
 				+ "-" + getMaximumCode() + ") }";
 	}
 	
 	/**
-	 * Returns the lowest code that can be in this {@link HttpResponseClass}.
+	 * Returns the lowest HTTP status code that can be in this {@link HttpStatusCodeClass}.
 	 * @since MyWebApi 1.0
 	 * @return The minimum HTTP status code for this response class
 	 */
@@ -80,7 +80,7 @@ public enum HttpResponseClass {
 	}
 	
 	/**
-	 * Returns the highest code that can be in this {@link HttpResponseClass}.
+	 * Returns the highest HTTP status code that can be in this {@link HttpStatusCodeClass}.
 	 * @since MyWebApi 1.0
 	 * @return The maximum HTTP status code for this response class
 	 */
@@ -94,7 +94,7 @@ public enum HttpResponseClass {
 	 * @param statusCode The HTTP status code to check
 	 * @return TRUE if the given status code belongs to this response class, FALSE if not
 	 */
-	public boolean isInThisClass(int statusCode) {
-		return statusCode >= getMinimumCode() && statusCode < getMaximumCode();
+	public boolean isInThisClass(HttpStatusCode statusCode) {
+		return statusCode.getCode() >= getMinimumCode() && statusCode.getCode() <= getMaximumCode();
 	}
 }

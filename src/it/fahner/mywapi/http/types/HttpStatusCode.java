@@ -14,7 +14,8 @@
    limitations under the License.
 */
 
-package it.fahner.mywapi.http;
+package it.fahner.mywapi.http.types;
+
 
 /**
  * Represents a numeric HTTP status code.
@@ -51,7 +52,7 @@ public enum HttpStatusCode {
 	NetworkConnectTimeoutError(599),
 	
 	/* Custom status code that is used when an unknown status code is received */
-	MYWAPI_unknown(999);
+	MyWebApiUnknown(999);
 	
 	/** Stores the internal numeric HTTP status code. */
 	private int code;
@@ -96,11 +97,11 @@ public enum HttpStatusCode {
 	 * @since MyWebApi 1.0
 	 * @return The HTTP response class this code belongs to
 	 */
-	public HttpResponseClass getResponseClass() {
-		for (HttpResponseClass cls : HttpResponseClass.values()) {
-			if (cls.isInThisClass(code)) { return cls; }
+	public HttpStatusCodeClass getResponseClass() {
+		for (HttpStatusCodeClass cls : HttpStatusCodeClass.values()) {
+			if (cls.isInThisClass(this)) { return cls; }
 		}
-		return HttpResponseClass.CLIENT_ERROR;
+		return HttpStatusCodeClass.CLIENT_ERROR;
 	}
 	
 	/**
@@ -113,7 +114,7 @@ public enum HttpStatusCode {
 		for (HttpStatusCode status : values()) {
 			if (status.code == code) { return status; }
 		}
-		return MYWAPI_unknown;
+		return MyWebApiUnknown;
 	}
 	
 }

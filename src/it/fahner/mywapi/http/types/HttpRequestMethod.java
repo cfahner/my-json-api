@@ -14,10 +14,10 @@
    limitations under the License.
 */
 
-package it.fahner.mywapi.http;
+package it.fahner.mywapi.http.types;
 
 /**
- * An HTTP request method as used by {@link HttpRequestThread}.
+ * An object representation of all possible HTTP request methods.
  * You can use the {@link #name()} function to get the request method's {@link String} value.
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>

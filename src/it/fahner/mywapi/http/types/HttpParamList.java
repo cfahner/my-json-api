@@ -14,8 +14,7 @@
    limitations under the License.
 */
 
-package it.fahner.mywapi.http;
-
+package it.fahner.mywapi.http.types;
 
 import java.util.HashMap;
 
