@@ -14,7 +14,10 @@
    limitations under the License.
 */
 
-package it.fahner.mywapi;
+package it.fahner.mywapi.myutil;
+
+import it.fahner.mywapi.MyRequest;
+import it.fahner.mywapi.MyWebApiListener;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

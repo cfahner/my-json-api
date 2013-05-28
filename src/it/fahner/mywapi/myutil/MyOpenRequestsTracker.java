@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package it.fahner.mywapi;
+package it.fahner.mywapi.myutil;
 
 import it.fahner.mywapi.http.HttpRequest;
 

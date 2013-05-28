@@ -19,6 +19,8 @@ package it.fahner.mywapi;
 import it.fahner.mywapi.http.HttpRequest;
 import it.fahner.mywapi.http.HttpRequestTimeoutException;
 import it.fahner.mywapi.http.types.HttpParamList;
+import it.fahner.mywapi.myutil.MyOpenRequestsTracker;
+import it.fahner.mywapi.myutil.MyWebApiListenerCollection;
 
 import java.net.MalformedURLException;
 import java.net.URL;
