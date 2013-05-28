@@ -60,12 +60,30 @@ public class MyWebApiListenerCollection {
 	 * @since MyWebApi 1.0
 	 * @param resolved The request that has been resolved
 	 */
-	public synchronized void invokeAll(MyRequest resolved) {
+	public synchronized void invokeAllResolved(MyRequest resolved) {
 		ArrayList<WeakReference<MyWebApiListener>> pointToNull = new ArrayList<WeakReference<MyWebApiListener>>();
 		for (WeakReference<MyWebApiListener> ref : listeners) {
 			if (ref == null) { continue; }
 			if (ref.get() == null) { pointToNull.add(ref); continue; }
 			ref.get().onRequestResolved(resolved);
+		}
+		listeners.removeAll(pointToNull);
+	}
+	
+	/**
+	 * Notifies all listeners contained in this collection about a content name that has
+	 * been invalidated (and it's cache has been cleaned).
+	 * <p>As a side effect, this method also removes all {@link WeakReference}s in this collection that
+	 * point to <code>null</code>, since it is has to iterate anyway.</p>
+	 * @since MyWebApi 1.0
+	 * @param contentName The name of the content that has been invalidated
+	 */
+	public synchronized void invokeAllContentInvalidated(String contentName) {
+		ArrayList<WeakReference<MyWebApiListener>> pointToNull = new ArrayList<WeakReference<MyWebApiListener>>();
+		for (WeakReference<MyWebApiListener> ref : listeners) {
+			if (ref == null) { continue; }
+			if (ref.get() == null) { pointToNull.add(ref); continue; }
+			ref.get().onContentInvalidated(contentName);
 		}
 		listeners.removeAll(pointToNull);
 	}

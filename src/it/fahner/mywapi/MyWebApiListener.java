@@ -32,10 +32,22 @@ public interface MyWebApiListener {
 	 * Note: Compare the runtime class of the resolved MyRequest to one of your own implementations to check what
 	 * kind of MyRequest has been resolved.
 	 * </p>
+	 * <p>Make sure your code runs on the UI-thread before manipulating the UI from this method.</p>
 	 * @see MyRequest MyRequest documentation
 	 * @since MyWebApi 1.0
 	 * @param request The MyRequest that has been resolved
 	 */
 	public void onRequestResolved(MyRequest request);
+	
+	/**
+	 * Implement this method to respond when a certain type of content (defined by
+	 * it's content name) has been invalidated (and any views displaying this type
+	 * of content should be updated).
+	 * <p>Make sure your code runs on the UI-thread before manipulating the UI from this method.</p>
+	 * @see MyRequest#getContentName()
+	 * @since MyWebApi 1.0
+	 * @param contentName The name of the content that has been invalidated
+	 */
+	public void onContentInvalidated(String contentName);
 	
 }
