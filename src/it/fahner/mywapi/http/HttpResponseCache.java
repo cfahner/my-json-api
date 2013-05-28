@@ -49,8 +49,19 @@ public final class HttpResponseCache {
 	 * @param expireAfter The amount of time to store the response (in milliseconds)
 	 */
 	public synchronized void store(HttpResponse response, long expireAfter) {
-		cache.put(response.getRequestMade().getResourceIdentity(), response);
-		expireTimes.put(response.getRequestMade().getResourceIdentity(), System.currentTimeMillis() + expireAfter);
+		cache.put(response.getOriginRequest().getResourceIdentity(), response);
+		expireTimes.put(response.getOriginRequest().getResourceIdentity(), System.currentTimeMillis() + expireAfter);
+	}
+	
+	/**
+	 * Checks if a response for the specified request is contained in this cache.
+	 * @since MyWebApi 1.0
+	 * @param request The request to check a response for
+	 * @return <code>true</code> if a response is contained in this cache, <code>false</code> otherwise
+	 */
+	public synchronized boolean hasResponseFor(HttpRequest request) {
+		clean();
+		return cache.containsKey(request.getResourceIdentity());
 	}
 	
 	/**

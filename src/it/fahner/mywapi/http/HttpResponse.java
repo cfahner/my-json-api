@@ -41,6 +41,9 @@ public final class HttpResponse {
 	/** Contains the timestamp after which this document is no longer cacheable. Can be <code>null</code>. */
 	private long expires;
 	
+	/** Contains the timestamp at which this response was instantiated. */
+	private long created;
+	
 	/**
 	 * Creates a new simple HTTP response representation.
 	 * @since MyWebApi 1.0
@@ -56,6 +59,7 @@ public final class HttpResponse {
 		this.body = body;
 		this.contentType = contentType;
 		this.expires = expires;
+		this.created = System.currentTimeMillis();
 	}
 	
 	public HttpResponse(HttpRequest request, HttpStatusCode status, String body, HttpContentType contentType) {
@@ -115,6 +119,16 @@ public final class HttpResponse {
 	}
 	
 	/**
+	 * Returns the time of creation of this instance. Useful for checking if this is a cached value.
+	 * <p>This is the number of milliseconds since January 1, 1970 GMT.</p>
+	 * @since MyWebApi 1.0
+	 * @return The instance creation time
+	 */
+	public long getCreateTime() {
+		return created;
+	}
+	
+	/**
 	 * Returns the amount of milliseconds left until this HTTP response expires. This is based on the
 	 * <code>'Expires'</code> header returned by the server and the current {@link HttpStatusCode}.
 	 * @see HttpStatusCode#isAlwaysCacheable() Cacheable HTTP status codes
@@ -133,7 +147,7 @@ public final class HttpResponse {
 	 * @since MyWebApi 1.0
 	 * @return The {@link HttpRequest} that was made to get this response
 	 */
-	public HttpRequest getRequestMade() {
+	public HttpRequest getOriginRequest() {
 		return request;
 	}
 	

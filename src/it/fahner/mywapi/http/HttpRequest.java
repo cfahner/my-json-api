@@ -54,17 +54,18 @@ public final class HttpRequest {
 	/** Stores the request body. */
 	private String body;
 	
+	/** The timestamp of when this request was created. */
+	private long created;
+	
+	/** Contains the response. */
+	private HttpResponse response;
+	
 	/**
 	 * Creates a new (unresolved) HTTP-GET request.
 	 * @param url The URL that points to the remote resource to retrieve
 	 */
 	public HttpRequest(String url) {
 		this(url, HttpRequestMethod.GET);
-	}
-	
-	@Override
-	public String toString() {
-		return "{HttpRequest => URL('" + connection.getURL().toString() + "') }";
 	}
 	
 	/**
@@ -75,6 +76,7 @@ public final class HttpRequest {
 	 */
 	public HttpRequest(String url, HttpRequestMethod method) {
 		this.body = "";
+		this.created = System.currentTimeMillis();
 		try {
 			this.connection = (HttpURLConnection) new URL(url).openConnection();
 			// Set the connection's request properties
@@ -82,13 +84,18 @@ public final class HttpRequest {
 			connection.setRequestProperty("Content-Type", CONTENT_TYPE + "; charset="
 					+ CHARSET.toLowerCase(Locale.ENGLISH));
 			connection.setRequestMethod(method.name());
-			connection.setDoInput(true); // get data FROM the URL
+			connection.setDoInput(true); // get data FROM the URL, should always be TRUE
 			HttpURLConnection.setFollowRedirects(true);
 			// we will implement our own caching since this is not reliable on every platform
 			connection.setUseCaches(false);
 		} catch (IOException e) {
 			throw new RuntimeException("HttpRequest: " + e.getMessage());
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return "{HttpRequest => URL('" + connection.getURL().toString() + "') }";
 	}
 	
 	/**
@@ -108,18 +115,31 @@ public final class HttpRequest {
 	 * @param body The contents of the body of this HTTP request (in UTF-8)
 	 */
 	public void setBody(String body) {
+		ensureUnresolved();
 		this.body = body;
+	}
+	
+	/**
+	 * Returns the time when this request was created.
+	 * @since MyWebApi 1.0
+	 * @return Amount of milliseconds since January 1, 1970 GMT when this request was instantiated
+	 */
+	public long getCreateTime() {
+		return created;
 	}
 	
 	/**
 	 * Tries to retrieve the remote resource that this HTTP request points to.
 	 * <p>Note: This is a synchronous operation (and blocks the current thread).</p>
+	 * <p>This object will become immutable after it's response has been retrieved.</p>
 	 * @since MyWebApi 1.0
 	 * @param timeout The time in milliseconds this method can last at most
 	 * @throws HttpRequestTimeoutException When the request took longer than the timeout value specified
 	 * @return The simplified HTTP response to this HTTP request
 	 */
 	public HttpResponse getResponse(int timeout) throws HttpRequestTimeoutException {
+		if (response != null) { return response; }
+		
 		connection.setRequestProperty("Content-Length", "" + Integer.toString(body.getBytes().length));
 		connection.setConnectTimeout(timeout);
 		try {
@@ -159,6 +179,24 @@ public final class HttpRequest {
 		} catch (FileNotFoundException fnfe) {
 			return new HttpResponse(this, HttpStatusCode.NotFound);
 		} catch (IOException ioe) { throw new HttpRequestTimeoutException(); }
+	}
+	
+	/**
+	 * Checks if this HTTP request has been resolved.
+	 * @since MyWebApi 1.0
+	 * @return The resolved state of this request, <code>true</code> if the response is available,
+	 *  <code>false</code> otherwise
+	 */
+	public boolean isResolved() {
+		return response != null;
+	}
+	
+	/**
+	 * Ensures the consistency of this request.
+	 * @throws HttpConsistencyException When this request has already been resolved
+	 */
+	private void ensureUnresolved() {
+		if (isResolved()) { throw new HttpConsistencyException(); }
 	}
 	
 }
