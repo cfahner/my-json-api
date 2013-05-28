@@ -16,10 +16,10 @@
 
 package it.fahner.mywapi;
 
-import it.fahner.mywapi.http.HttpParamList;
-import it.fahner.mywapi.http.HttpRequestMethod;
 import it.fahner.mywapi.http.HttpResponse;
-import it.fahner.mywapi.http.HttpStatusCode;
+import it.fahner.mywapi.http.types.HttpParamList;
+import it.fahner.mywapi.http.types.HttpRequestMethod;
+import it.fahner.mywapi.http.types.HttpStatusCode;
 
 /**
  * Defines an interface for implementing your own MyWebApi requests. A base implementation for this
@@ -78,11 +78,11 @@ public interface MyRequest {
 	public HttpParamList getUrlParameters();
 	
 	/**
-	 * Returns the list of parameters to put in the body of the request.
+	 * Returns the HTTP body of the request to send.
 	 * @since MyWebApi 1.0
 	 * @return The list of parameters to use as the request body
 	 */
-	public HttpParamList getBodyParameters();
+	public String getBody();
 	
 	/**
 	 * Called when this request has been resolved and has failed.

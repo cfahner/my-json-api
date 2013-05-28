@@ -16,7 +16,7 @@
 
 package it.fahner.mywapi;
 
-import it.fahner.mywapi.http.HttpRequestThread;
+import it.fahner.mywapi.http.HttpRequest;
 
 import java.util.HashSet;
 
@@ -44,7 +44,7 @@ public class MyOpenRequestsTracker {
 	 * @since MyWebApi 1.0
 	 * @param request The request to store
 	 */
-	public synchronized void storeRequest(HttpRequestThread request) {
+	public synchronized void storeRequest(HttpRequest request) {
 		this.openRequests.add(request.getResourceIdentity());
 	}
 	
@@ -53,7 +53,7 @@ public class MyOpenRequestsTracker {
 	 * @since MyWebApi 1.0
 	 * @param request The request to remove
 	 */
-	public synchronized void removeRequest(HttpRequestThread request) {
+	public synchronized void removeRequest(HttpRequest request) {
 		this.openRequests.remove(request.getResourceIdentity());
 	}
 	
@@ -64,7 +64,7 @@ public class MyOpenRequestsTracker {
 	 * @return <code>true</code> if a request for the same resource has already been opened,
 	 *  <code>false</code> otherwise
 	 */
-	public synchronized boolean isOpen(HttpRequestThread request) {
+	public synchronized boolean isOpen(HttpRequest request) {
 		return this.openRequests.contains(request.getResourceIdentity());
 	}
 	
