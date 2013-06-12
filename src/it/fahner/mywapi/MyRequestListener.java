@@ -17,13 +17,12 @@
 package it.fahner.mywapi;
 
 /**
- * Event listener. Implementations of this interface can handle events fired by
- * MyWebApi.
+ * Event listener. Implementations of this interface can handle events fired by MyWebApi.
  * <p>Note: Remember to start listening to MyWebApi by calling it's startListening method.</p>
  * @since MyWebApi 1.0
  * @author C. Fahner <info@fahnerit.com>
  */
-public interface MyWebApiListener {
+public interface MyRequestListener {
 	
 	/**
 	 * Implement this method to run code when a MyRequest has been resolved.
@@ -38,16 +37,5 @@ public interface MyWebApiListener {
 	 * @param request The MyRequest that has been resolved
 	 */
 	public void onRequestResolved(MyRequest request);
-	
-	/**
-	 * Implement this method to respond when a certain type of content (defined by
-	 * it's content name) has been invalidated (and any views displaying this type
-	 * of content should be updated).
-	 * <p>Make sure your code runs on the UI-thread before manipulating the UI from this method.</p>
-	 * @see MyRequest#getContentName()
-	 * @since MyWebApi 1.0
-	 * @param contentName The name of the content that has been invalidated
-	 */
-	public void onContentInvalidated(String contentName);
 	
 }

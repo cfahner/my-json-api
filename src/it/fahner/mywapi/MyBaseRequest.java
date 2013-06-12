@@ -19,6 +19,8 @@ package it.fahner.mywapi;
 import it.fahner.mywapi.http.HttpResponse;
 import it.fahner.mywapi.http.types.HttpParamList;
 import it.fahner.mywapi.http.types.HttpRequestMethod;
+import it.fahner.mywapi.http.types.HttpStatusCode;
+import it.fahner.mywapi.http.types.HttpStatusCodeClass;
 
 /**
  * A basic implementation of {@link MyRequest}. Does not make any assumptions. Most methods of the
@@ -31,8 +33,8 @@ import it.fahner.mywapi.http.types.HttpRequestMethod;
  */
 public abstract class MyBaseRequest implements MyRequest {
 	
-	/** Flag indicating that the request has failed. */
-	private boolean failed = false;
+	/** Flag indicating that the request has been resolved at all (ok or fail). */
+	private boolean resolved = false;
 	
 	/** Contains the response if the request was completed. */
 	private HttpResponse response;
@@ -69,12 +71,13 @@ public abstract class MyBaseRequest implements MyRequest {
 
 	@Override
 	public final void fail() {
-		this.failed = true;
+		this.resolved = true;
 		onResolved();
 	}
 
 	@Override
 	public final void complete(HttpResponse response) {
+		this.resolved = true;
 		this.response = response;
 		onResolved();
 	}
@@ -83,39 +86,45 @@ public abstract class MyBaseRequest implements MyRequest {
 	 * Returns the raw HTTP response of this request, if it has succeeded.
 	 * @since MyWebApi 1.0
 	 * @return The {#link HttpResponse} if the request has succeeded, <code>null</code> if the request
-	 *  has failed or not yet been resolved
+	 *  has resolved or not yet been resolved
 	 */
 	protected HttpResponse getResponse() {
 		return this.response;
 	}
 	
 	/**
-	 * Checks if this request has been resolved but has failed (due to a timeout or I/O error).
+	 * Checks if this request has been resolved but has resolved (due to a timeout or I/O error).
 	 * @since MyWebApi 1.0
-	 * @return <code>true</code> if this request has failed, <code>false</code> otherwise
+	 * @return <code>true</code> if this request has resolved, <code>false</code> otherwise
 	 */
 	public final boolean hasFailed() {
-		return this.failed;
+		if (!this.resolved) { return false; }
+		return !hasSucceeded();
 	}
 	
 	/**
-	 * Checks if this request has been resolved and has succeeded, indicating that a response is
-	 * available.
+	 * Checks if this request has been resolved and has succeeded, indicating that a good response is available.
+	 * <p>Note: Also requires the HTTP response code to be in the 2xx SUCCESS range.</p>
+	 * @see HttpStatusCode HTTP status codes
+	 * @see HttpStatusCodeClass HTTP status code classes / ranges
 	 * @since MyWebApi 1.0
 	 * @return <code>true</code> if the request has successfully received a response, <code>false</code> otherwise
 	 */
 	public final boolean hasSucceeded() {
-		return this.response != null;
+		if (!this.resolved) { return false; }
+		if (this.response == null) { return false; }
+		if (!this.response.getStatus().getResponseClass().equals(HttpStatusCodeClass.SUCCESS)) { return false; }
+		return true;
 	}
 	
 	/**
 	 * Checks if this request has been resolved.
 	 * @since MyWebApi 1.0
-	 * @return <code>true</code> if the request has either failed or succeeded, <code>false</code> if nothing has
+	 * @return <code>true</code> if the request has either resolved or succeeded, <code>false</code> if nothing has
 	 *  happened yet
 	 */
 	public final boolean isResolved() {
-		return this.failed || this.response != null;
+		return this.resolved;
 	}
 	
 	/**

@@ -20,15 +20,16 @@ import it.fahner.mywapi.http.HttpRequest;
 import it.fahner.mywapi.http.HttpRequestTimeoutException;
 import it.fahner.mywapi.http.HttpResponse;
 import it.fahner.mywapi.http.types.HttpParamList;
+import it.fahner.mywapi.myutil.MyContentListenerCollection;
 import it.fahner.mywapi.myutil.MyOpenRequestsTracker;
-import it.fahner.mywapi.myutil.MyWebApiListenerCollection;
+import it.fahner.mywapi.myutil.MyRequestListenerCollection;
 import it.fahner.mywapi.myutil.MyWebCache;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * The main entry point for the MyWebApi library. All requests, threads, caches and listeners
+ * The main entry point for the MyWebApi library. All requests, threads, caches and requestListeners
  * are managed here.
  * <p>Most basic setup:</p>
  * <p><code>
@@ -39,13 +40,13 @@ import java.net.URL;
  * {@link #startRequest(MyRequest)}. It is recommended to extend {@link MyBaseRequest} for your own requests
  * instead of using the actual interface, since that will reduce the chances of your code breaking due to an interface
  * change.</p>
- * <p>When any request is resolved, all listeners are notified using their {@link MyWebApiListener#onRequestResolved(MyRequest)}
+ * <p>When any request is resolved, all requestListeners are notified using their {@link MyRequestListener#onRequestResolved(MyRequest)}
  * method.</p>
  * <p>Caching is enabled by default, but can only work if {@link MyRequest#getCacheTime()} returns
  * a value greater than zero AND {@link MyRequest#getContentName()} returns a non-<code>null</code> value.</p>
  * <p>If a completed request causes some content to become invalid (as a result of the operation of that request),
  * use {@link #invalidateContent(String)} to invalidate the cache for that type of content. This will also notify
- * all other listeners through their {@link MyWebApiListener#onContentInvalidated(String)} method.</p>
+ * all other requestListeners through their {@link MyRequestListener#onContentChanged(String)} method.</p>
  * <p>Persisting the cache through multiple sessions requires you to serialize the returned value
  * of {@link #getCache()} and store it to disk. Later re-instantiate the cache and apply it to the API using
  * {@link #setCache(MyWebCache)}. A better API will be provided in a future release.</p>
@@ -79,8 +80,11 @@ public final class MyWebApi {
 	/** Flag indicating if this class should use a cache. Defaults to <code>true</code>. */
 	private boolean useCache;
 	
-	/** Stores all registered {@link MyWebApiListener}s. */
-	private MyWebApiListenerCollection listeners;
+	/** Stores all registered {@link MyRequestListener}s. */
+	private MyRequestListenerCollection requestListeners;
+	
+	/** Stores all registered {@link MyContentListener}s. */
+	private MyContentListenerCollection contentListeners;
 	
 	/** Keeps track of all currently opened requests. */
 	private MyOpenRequestsTracker openRequests;
@@ -99,7 +103,8 @@ public final class MyWebApi {
 		this.persistentUrlParams = new HttpParamList();
 		this.timeoutMillis = DEFAULT_TIMEOUT;
 		this.useCache = true;
-		this.listeners = new MyWebApiListenerCollection();
+		this.requestListeners = new MyRequestListenerCollection();
+		this.contentListeners = new MyContentListenerCollection();
 		this.openRequests = new MyOpenRequestsTracker();
 		this.cache = new MyWebCache();
 	}
@@ -137,8 +142,18 @@ public final class MyWebApi {
 	 * @since MyWebApi 1.0
 	 * @param listener The callback to register
 	 */
-	public void startListening(MyWebApiListener listener) {
-		listeners.put(listener);
+	public void startListening(MyRequestListener listener) {
+		requestListeners.put(listener);
+	}
+	
+	/**
+	 * Registers a callback to be invoked when any content under their associated content names
+	 * is changed.
+	 * @since MyWebApi 1.0
+	 * @param listener The callback to register
+	 */
+	public void startContentListening(MyContentListener listener) {
+		contentListeners.put(listener);
 	}
 	
 	/**
@@ -157,7 +172,7 @@ public final class MyWebApi {
 		// Check if the cache has a valid response ready now (if it is used)
 		if (useCache && request.getContentName() != null && cache.hasResponse(request.getContentName(), http)) {
 			request.complete(cache.getResponse(request.getContentName(), http));
-			listeners.invokeAllResolved(request);
+			requestListeners.invokeAll(request);
 			return;
 		}
 		
@@ -174,7 +189,7 @@ public final class MyWebApi {
 					if (useCache && cacheTime > 0) { cache.add(request.getContentName(), response, cacheTime); }
 				} catch (HttpRequestTimeoutException e) { request.fail(); }
 				openRequests.removeRequest(http);
-				listeners.invokeAllResolved(request);
+				requestListeners.invokeAll(request);
 			}
 			
 		}).start();
@@ -182,13 +197,13 @@ public final class MyWebApi {
 	
 	/**
 	 * Invalidates all cached responses that are stored under the given content name.
-	 * <p>Also notifies all listeners that content with the given name has been invalidated.</p>
+	 * <p>Also notifies all requestListeners that content with the given name has been invalidated.</p>
 	 * @since MyWebApi 1.0
 	 * @param contentName The content name to invalidate
 	 */
 	public void invalidateContent(String contentName) {
 		cache.removeAll(contentName);
-		listeners.invokeAllContentInvalidated(contentName);
+		contentListeners.invokeAll(contentName);
 	}
 	
 	/**

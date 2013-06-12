@@ -2,7 +2,7 @@ package it.fahner.mywapi.test;
 
 import it.fahner.mywapi.MyRequest;
 import it.fahner.mywapi.MyWebApi;
-import it.fahner.mywapi.MyWebApiListener;
+import it.fahner.mywapi.MyRequestListener;
 import it.fahner.mywapi.http.HttpResponse;
 import it.fahner.mywapi.http.types.HttpParamList;
 import it.fahner.mywapi.http.types.HttpRequestMethod;
@@ -67,7 +67,7 @@ public class MyWebApiTester {
 			}
 		};
 		
-		api.startListening(new MyWebApiListener() {
+		api.startListening(new MyRequestListener() {
 			
 			@Override
 			public void onRequestResolved(MyRequest request) {
@@ -81,11 +81,6 @@ public class MyWebApiTester {
 				}
 			}
 			
-			@Override
-			public void onContentInvalidated(String contentName) {
-				// TODO Auto-generated method stub
-				
-			}
 		});
 		
 		api.startRequest(sample);
