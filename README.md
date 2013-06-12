@@ -26,8 +26,8 @@ Things to consider before using this library:
 How to include
 --------------
 
-Simply merge the src/ directory into your existing project, or make a .jar
-file and include that as a library.
+Simply merge the src/ directory into your existing project, or download the latest version as a .jar file from
+the jars/ directory.
 
 Usage example
 -------------
