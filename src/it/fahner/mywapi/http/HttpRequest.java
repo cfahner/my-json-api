@@ -122,9 +122,9 @@ public final class HttpRequest {
 	/**
 	 * Returns the current body set for this request.
 	 * @since MyWebApi 1.0
-	 * @param body The current body (if set), <code>null</code> otherwise
+	 * @return The current body (if set), <code>null</code> otherwise
 	 */
-	public String getBody(String body) {
+	public String getBody() {
 		return this.body;
 	}
 	

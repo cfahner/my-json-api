@@ -80,6 +80,9 @@ public final class MyWebApi {
 	/** Flag indicating if this class should use a cache. Defaults to <code>true</code>. */
 	private boolean useCache;
 	
+	/** Flag indicating if it's allowed to have duplicate requests in progress. */
+	private boolean allowDuplicates;
+	
 	/** Stores all registered {@link MyRequestListener}s. */
 	private MyRequestListenerCollection requestListeners;
 	
@@ -103,10 +106,12 @@ public final class MyWebApi {
 		this.persistentUrlParams = new HttpParamList();
 		this.timeoutMillis = DEFAULT_TIMEOUT;
 		this.useCache = true;
+		this.allowDuplicates = false;
 		this.requestListeners = new MyRequestListenerCollection();
 		this.contentListeners = new MyContentListenerCollection();
 		this.openRequests = new MyOpenRequestsTracker();
 		this.cache = new MyWebCache();
+		MyLog.log("New instance for URL '" + baseUrl + "'");
 	}
 	
 	/**
@@ -127,22 +132,28 @@ public final class MyWebApi {
 		} catch (MalformedURLException e) {
 			// If base+path+query is malformed, just use base+query, which (if malformed) will fail
 			// automatically when it is passed to the HttpRequest
-			System.err.println("MyWebApi: malformed full URL, reverting to base URL");
+			MyLog.error("Malformed full URL, reverting to base URL (" + myReq + ")");
 			urlToUse += query;
 		}
+		MyLog.log("Created HttpRequest for URL '" + urlToUse + "' (" + myReq + ")");
 		HttpRequest out = myReq.getRequestMethod() != null
 				? new HttpRequest(urlToUse, myReq.getRequestMethod())
 				: new HttpRequest(urlToUse);
 		if (myReq.getBody() != null) { out.setBody(myReq.getBody()); }
+		MyLog.log(".. with request body: " + out.getBody());
 		return out;
 	}
 	
 	/**
 	 * Registers a callback to be invoked when any {@link MyRequest}s are resolved.
+	 * <p>There is currently no way to directly remove a listener from the API other than unsetting all
+	 * references to it and waiting for it to be garbage collected.</p>
+	 * <p>This behavior should be added in a future release.</p>
 	 * @since MyWebApi 1.0
 	 * @param listener The callback to register
 	 */
 	public void startListening(MyRequestListener listener) {
+		MyLog.log("A request listener was attached (" + listener + ")");
 		requestListeners.put(listener);
 	}
 	
@@ -153,6 +164,7 @@ public final class MyWebApi {
 	 * @param listener The callback to register
 	 */
 	public void startContentListening(MyContentListener listener) {
+		MyLog.log("A content listener was attached (" + listener + ")");
 		contentListeners.put(listener);
 	}
 	
@@ -166,11 +178,16 @@ public final class MyWebApi {
 	 * @param request An implementation of MyRequest that needs to be resolved
 	 */
 	public void startRequest(final MyRequest request) {
+		MyLog.log("MyRequest started (" + request + ")");
 		final HttpRequest http = convertToHttpRequest(request);
-		if (openRequests.isOpen(http)) { return; }
+		if (!allowDuplicates && openRequests.isOpen(http)) {
+			MyLog.log("MyRequest ignored, already open (" + request + ")");
+			return;
+		}
 		
 		// Check if the cache has a valid response ready now (if it is used)
 		if (useCache && request.getContentName() != null && cache.hasResponse(request.getContentName(), http)) {
+			MyLog.log("MyRequest completed from cache (" + request + ")");
 			request.complete(cache.getResponse(request.getContentName(), http));
 			requestListeners.invokeAll(request);
 			return;
@@ -186,8 +203,15 @@ public final class MyWebApi {
 					HttpResponse response = http.getResponse(timeoutMillis);
 					request.complete(response);
 					long cacheTime = request.getCacheTime();
-					if (useCache && cacheTime > 0) { cache.add(request.getContentName(), response, cacheTime); }
-				} catch (HttpRequestTimeoutException e) { request.fail(); }
+					if (useCache && cacheTime > 0) {
+						MyLog.log("MyRequest response cached for " + cacheTime + " ms (" + request + ")");
+						MyLog.log(".. cached using name '" + request.getContentName() + "'");
+						cache.add(request.getContentName(), response, cacheTime);
+					}
+				} catch (HttpRequestTimeoutException e) {
+					request.fail();
+					MyLog.log("MyRequest timed out (" + request + ")");
+				}
 				openRequests.removeRequest(http);
 				requestListeners.invokeAll(request);
 			}
@@ -197,7 +221,7 @@ public final class MyWebApi {
 	
 	/**
 	 * Invalidates all cached responses that are stored under the given content name.
-	 * <p>Also notifies all requestListeners that content with the given name has been invalidated.</p>
+	 * <p>Also notifies all content listeners that content with the given name has been invalidated.</p>
 	 * @since MyWebApi 1.0
 	 * @param contentName The content name to invalidate
 	 */
@@ -267,6 +291,19 @@ public final class MyWebApi {
 	public void setCacheEnabled(boolean enable) {
 		this.useCache = enable;
 		if (!useCache) { cache.clear(); }
+	}
+	
+	/**
+	 * Specifies the behavior of the API instance when it encounters a new request that is already in
+	 * progress as another instance (based on the URL it points to and it's request body).
+	 * <p>Is set to <code>false</code> by default.</p>
+	 * @since MyWebApi 1.0
+	 * @param allowDuplicates <code>true</code> to allow the same request to be "in flight" multiple times,
+	 *   <code>false</code> to prevent duplicate requests from being sent at the same time
+	 */
+	public void setAllowDuplicates(boolean allowDuplicates) {
+		this.allowDuplicates = allowDuplicates;
+		MyLog.log("Request duplication has been " + (allowDuplicates ? "disallowed" : "allowed"));
 	}
 	
 }
