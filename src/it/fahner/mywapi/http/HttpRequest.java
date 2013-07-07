@@ -99,14 +99,14 @@ public final class HttpRequest {
 	}
 	
 	/**
-	 * Returns a string that uniquely represents the remote resource being resolved by
-	 * this HTTP request. Requests with the same resource identity value are in practice
-	 * the same requests.
+	 * Returns a string that uniquely represents the remote resource being resolved by this HTTP request.
+	 * <p>Requests with the same resource identity value are likely the same requests.</p>
+	 * <p>Only the hashCode of the body is used, since the body may contain large amounts of binary data.</p>
 	 * @since MyWebApi 1.0
 	 * @return A string that uniquely identifies the remote resource
 	 */
 	public String getResourceIdentity() {
-		return connection.getRequestMethod() + connection.getURL().toExternalForm() + body;
+		return connection.getRequestMethod() + connection.getURL().toExternalForm() + System.identityHashCode(body);
 	}
 	
 	/**
@@ -117,6 +117,15 @@ public final class HttpRequest {
 	public void setBody(String body) {
 		ensureUnresolved();
 		this.body = body;
+	}
+	
+	/**
+	 * Returns the current body set for this request.
+	 * @since MyWebApi 1.0
+	 * @param body The current body (if set), <code>null</code> otherwise
+	 */
+	public String getBody(String body) {
+		return this.body;
 	}
 	
 	/**
