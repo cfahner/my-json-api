@@ -1,6 +1,5 @@
 * Make example implementation of getCacheTime in JavaDoc
 * Add method to MyBaseRequest that returns a boolean indicating that the request can possible be cached (based on HTTP statuses alone)
-* Add debug output (that can be enabled/disabled)
 * MyBaseRequest#getBody() needs updated JavaDoc and should show an example implementation (that creates a HttpParamList and returns it as string)
 * Fix bug that prevents the same requests from being sent multiple times
 * Implement MyWebApi#allowDuplicates flag that disables default behavior when two requests of equal identity are in progress
@@ -10,4 +9,9 @@
 * Modify MyRequestListener#onRequestResolved method signature to "final MyRequest request" instead of just
   "MyRequest request" to indicate that a jump to the UI thread is probably needed
 * Implement a queuing mechanism that has to be explicitly enabled and disabled (for example when no connection is available)
-  The entire queue should be processed once queueing is disabled again
+  The entire queue should be processed once queuing is disabled again
+
+
+
+
+
