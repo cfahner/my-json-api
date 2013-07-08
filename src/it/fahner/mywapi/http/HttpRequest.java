@@ -165,7 +165,9 @@ public final class HttpRequest {
 			connection.connect(); // call connect just to be sure, will be ignored if already called anyways
 			String responseEnctype = connection.getContentEncoding();
 			if (responseEnctype == null) { responseEnctype = CHARSET; }
-			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), responseEnctype));
+			BufferedReader reader = new BufferedReader(
+				new InputStreamReader(connection.getInputStream(), responseEnctype), 8192
+			);
 			String line;
 			StringBuilder responseBody = connection.getContentLength() > 0
 					? new StringBuilder(connection.getContentLength()) : new StringBuilder();
