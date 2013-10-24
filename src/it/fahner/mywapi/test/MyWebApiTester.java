@@ -1,5 +1,6 @@
 package it.fahner.mywapi.test;
 
+import it.fahner.mywapi.MyLog;
 import it.fahner.mywapi.MyRequest;
 import it.fahner.mywapi.MyWebApi;
 import it.fahner.mywapi.MyRequestListener;
@@ -16,8 +17,8 @@ public class MyWebApiTester {
 
 	public static void main(String[] args) {
 		final MyWebApi api = new MyWebApi("http://www.fahnerit.com/api/quizit/");
+		MyLog.enable();
 		
-		final boolean secondOne = false;
 		final MyRequest sample = new MyRequest() {
 			
 			@Override
@@ -41,8 +42,7 @@ public class MyWebApiTester {
 			
 			@Override
 			public String getContentName() {
-				// TODO Auto-generated method stub
-				return null;
+				return "CONTENT-NAME";
 			}
 			
 			@Override
@@ -76,13 +76,13 @@ public class MyWebApiTester {
 					Thread.sleep(250);
 					api.startRequest(sample);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 			
 		});
 		
+		api.startRequest(sample);
 		api.startRequest(sample);
 	}
 	

@@ -38,10 +38,10 @@ import java.net.URL;
  * </code></p>
  * <p>To start a new request, pass an implementation of {@link MyRequest} to
  * {@link #startRequest(MyRequest)}. It is recommended to extend {@link MyBaseRequest} for your own requests
- * instead of using the actual interface, since that will reduce the chances of your code breaking due to an interface
- * change.</p>
- * <p>When any request is resolved, all requestListeners are notified using their {@link MyRequestListener#onRequestResolved(MyRequest)}
- * method.</p>
+ * instead of using the actual interface, since that will reduce the chances of your code breaking due to an
+ * interface change.</p>
+ * <p>When any request is resolved, all requestListeners are notified using their
+ * {@link MyRequestListener#onRequestResolved(MyRequest)} method.</p>
  * <p>Caching is enabled by default, but can only work if {@link MyRequest#getCacheTime()} returns
  * a value greater than zero AND {@link MyRequest#getContentName()} returns a non-<code>null</code> value.</p>
  * <p>If a completed request causes some content to become invalid (as a result of the operation of that request),

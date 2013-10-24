@@ -35,12 +35,12 @@ public final class HttpParam {
 	/**
 	 * Create a new simple parameter.
 	 * @since MyWebApi 1.0
-	 * @param name The parameter name
-	 * @param value The parameter value
+	 * @param name The parameter name, an empty string is used if <code>null</code> given
+	 * @param value The parameter value, an empty string is used if <code>null</code> given
 	 */
 	public HttpParam(String name, String value) {
-		this.name = name;
-		this.value = value;
+		this.name = name != null ? name : "";
+		this.value = value != null ? value : "";
 	}
 	
 	@Override

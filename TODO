@@ -4,8 +4,6 @@
 * Fix bug that prevents the same requests from being sent multiple times in some cases
 * Implement/add public String[] MyRequest#getInvalidatedContent(), which should return the content-names of invalidated content
 * Output request statistics when logging is enabled (time to resolve and size in KB / MB etc, nicely formatted)
-* Modify MyRequestListener#onRequestResolved method signature to "final MyRequest request" instead of just
-  "MyRequest request" to indicate that a jump to the UI thread is probably needed
 * Implement a queuing mechanism that has to be explicitly enabled and disabled (for example when no connection is available)
   The entire queue should be processed once queuing is disabled again
 
